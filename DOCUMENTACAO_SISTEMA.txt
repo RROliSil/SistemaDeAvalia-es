@@ -1,0 +1,139 @@
+================================================================================
+DOCUMENTAÇÃO DO SISTEMA - RAINHA: CENTRAL DE PROVAS DE EXCEL
+Última Atualização: 18/11/2026
+Versão: 1.0.0
+================================================================================
+
+1. VISÃO GERAL DO SISTEMA
+--------------------------------------------------------------------------------
+O "Rainha - Central de Provas de Excel" é um sistema desktop (Launcher + Instalador
+Único) desenvolvido em C# (.NET 10 Windows Forms, Self-Contained Single-File)
+para aplicação automatizada e segura de avaliações práticas de Microsoft Excel
+(ex.: Prova de Excel para Aprendiz, Prova de Excel Avançado).
+
+O sistema elimina a necessidade de instalar dependências externas (possui o
+runtime .NET, logotipo, ícone e templates iniciais embutidos no próprio .exe)
+e garante que o candidato jamais altere o template original e jamais perca suas
+respostas ao fechar o Excel.
+
+
+2. IDENTIDADE VISUAL E PALETA DE CORES (RAINHA - DESDE 2007)
+--------------------------------------------------------------------------------
+- Vermelho Terracota Principal (Brand Red):   #DF462A (RGB: 223, 70, 42)
+- Laranja Quente Secundário (Brand Orange):   #F18024 (RGB: 241, 128, 36)
+- Amarelo Ouro Destaque (Brand Yellow):       #FCC32B (RGB: 252, 195, 43)
+- Fundo Creme Suave (Warm Background):        #FFF9F5 (RGB: 255, 249, 245)
+- Texto Principal Escuro (Text Dark):         #2D2522 (RGB: 45, 37, 34)
+
+
+3. REGRAS DE NEGÓCIO (RN)
+--------------------------------------------------------------------------------
+[RN01] Listagem Automática de Provas:
+       Ao abrir o Launcher com duplo clique, o sistema varre automaticamente a
+       pasta "Templates" e lista todos os arquivos de Excel (.xlsx, .xlsm, .xls)
+       disponíveis, ignorando arquivos temporários do Excel (iniciados por "~$").
+
+[RN02] Identificação Obrigatória do Candidato:
+       Sempre que o candidato clicar em uma prova da lista, o sistema exibe o
+       modal de identificação exigindo o Nome Completo (mínimo de 3 caracteres
+       válidos). Caracteres inválidos para nomes de arquivo no Windows são
+       higienizados automaticamente.
+
+[RN03] Proteção e Integridade do Template Original ("Salvar Como" Automático):
+       O template original localizado na pasta "Templates" é marcado com o
+       atributo Somente Leitura (Read-Only) e JAMAIS é aberto diretamente no
+       Excel. Antes de abrir o Excel, o sistema cria uma cópia limpa do template
+       diretamente na pasta "Provas Feitas" nomeada com o Nome Completo do
+       candidato (ex.: "Provas Feitas\Maria Aparecida da Silva.xlsx").
+
+[RN04] Prevenção contra Sobrescrita de Provas Anteriores:
+       Caso já exista um arquivo com o mesmo Nome Completo na pasta "Provas Feitas"
+       (ex.: candidato fazendo uma segunda prova ou homônimo), o sistema nomeia
+       automaticamente como "<Nome Completo> - <Nome da Prova>.xlsx" ou adiciona
+       sufixo incremental "(2)", "(3)", garantindo que nenhuma prova feita seja
+       sobrescrita.
+
+[RN05] Salvamento Automático ao Fechar o Excel (Mesmo sem clicar em Salvar):
+       O Launcher controla a instância do Microsoft Excel via automação COM e
+       intercepta o evento nativo "WorkbookBeforeClose" (DispId 1570 da interface
+       AppEvents {00024413-0000-0000-C000-000000000046}) e "WorkbookBeforeSave"
+       (DispId 1571).
+       - Se o candidato clicar em Salvar durante a prova: salva normalmente no
+         arquivo dele na pasta "Provas Feitas".
+       - Se o candidato apenas fechar o Excel clicando no "X" sem salvar: o
+         evento WorkbookBeforeClose executa automaticamente "Workbook.Save()" e
+         define "Workbook.Saved = true", salvando todas as respostas sem exibir
+         a caixa de diálogo "Deseja salvar as alterações?" (evitando que o
+         candidato clique em "Não Salvar").
+
+[RN06] Fechamento pelo Botão do Launcher:
+       Enquanto a prova está aberta, o Launcher exibe o painel "Prova em
+       Andamento" com o nome do candidato, nome da prova, cronômetro de tempo
+       decorrido e o botão "Finalizar e Salvar Prova Agora", que também força o
+       salvamento e encerra o Excel com segurança.
+
+[RN07] Instalação Única e Atalho na Área de Trabalho:
+       O executável "Instalador_Rainha_Provas.exe" (ou o próprio Launcher em
+       sua primeira execução) instala o sistema em "C:\RainhaProvasExcel",
+       extrai os templates iniciais na pasta "Templates", cria a pasta
+       "Provas Feitas" e gera automaticamente o atalho "Provas de Excel - Rainha"
+       na Área de Trabalho com o ícone oficial da Rainha.
+
+[RN08] Registro Automático de Histórico e Auditoria:
+       Ao término de cada prova, o sistema grava os metadados da avaliação
+       (ID, Nome Completo, Prova Realizada, Arquivo Salvo, Data/Hora de Início,
+       Data/Hora de Fim, Duração em Segundos e Status) nos arquivos de banco
+       local "banco_provas.json" e "historico_provas.csv".
+
+
+4. ESTRUTURA DO BANCO DE DADOS E DIRETÓRIOS
+--------------------------------------------------------------------------------
+4.1. Estrutura de Pastas (Padrão: C:\RainhaProvasExcel\ ou diretório local):
+     ├── RainhaLauncherProvas.exe          (Executável principal autónomo)
+     ├── Instalador_Rainha_Provas.exe      (Instalador de 1 clique autónomo)
+     ├── DOCUMENTACAO_SISTEMA.txt          (Documentação técnica e regras)
+     ├── assets\
+     │   ├── logo_rainha.png               (Logotipo oficial Rainha)
+     │   └── rainha.ico                    (Ícone oficial do executável e atalho)
+     ├── Templates\                        (Modelos originais protegidos - ReadOnly)
+     │   ├── Prova de Excel para Aprendiz.xlsx
+     │   └── Prova de Excel Avançado.xlsx
+     └── Provas Feitas\                    (Provas concluídas pelos candidatos)
+         ├── <Nome Completo do Candidato>.xlsx
+         ├── banco_provas.json             (Banco de dados estruturado JSON)
+         └── historico_provas.csv          (Relatório tabular compatível com Excel)
+
+4.2. Estrutura da Tabela/Coleção de Histórico (banco_provas.json / historico_provas.csv):
+     Entidade: ExamHistoryEntry
+     +------------------+--------------+-----------------------------------------------+
+     | Campo            | Tipo         | Descrição                                     |
+     +------------------+--------------+-----------------------------------------------+
+     | Id               | VARCHAR(8)   | Identificador único hexadecimal (PK)          |
+     | NomeCandidato    | VARCHAR(120) | Nome completo informado pelo candidato        |
+     | ProvaRealizada   | VARCHAR(150) | Nome do template de prova selecionado         |
+     | ArquivoSalvo     | VARCHAR(260) | Nome do arquivo .xlsx salvo em Provas Feitas  |
+     | DataHoraInicio   | DATETIME     | Data e hora exata da abertura da prova        |
+     | DataHoraFim      | DATETIME     | Data e hora exata do fechamento/salvamento    |
+     | DuracaoSegundos  | INT          | Tempo total de realização da prova (segundos) |
+     | Status           | VARCHAR(30)  | Status final (ex.: CONCLUIDA_E_SALVA)         |
+     +------------------+--------------+-----------------------------------------------+
+
+
+5. ARQUITETURA DO CÓDIGO-FONTE
+--------------------------------------------------------------------------------
+- RainhaLauncherProvas.csproj : Configuração do projeto .NET 10 WinForms e
+                                recursos embutidos (EmbeddedResource).
+- Program.cs                  : Ponto de entrada, roteamento entre modo Launcher,
+                                modo Instalador (--install / --silent-install) e
+                                autoteste automatizado (--self-test).
+- AppConfigAndStorage.cs      : Gerenciamento de pastas, extração de templates,
+                                criação de atalho via WScript.Shell, sanitização
+                                de nomes e persistência no banco JSON/CSV.
+- ExcelSessionManager.cs      : Automação COM do Microsoft Excel, conexão com
+                                IConnectionPoint (AppEvents) para interceptação
+                                do WorkbookBeforeClose e salvamento automático.
+- MainForm.cs                 : Interface principal com identidade visual Rainha,
+                                listagem dinâmica de provas e cronômetro ativo.
+- CandidateNameDialog.cs      : Modal de captura e validação do Nome Completo.
+- InstallerForm.cs            : Interface do Instalador Único de 1 clique.
+================================================================================

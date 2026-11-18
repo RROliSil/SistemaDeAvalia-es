@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>assets\rainha.ico</ApplicationIcon>
+    <AssemblyName>RainhaLauncherProvas</AssemblyName>
+    <Product>Rainha - Sistema de Provas de Excel</Product>
+    <Company>Rainha</Company>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="assets\logo_rainha.png" LogicalName="Rainha.logo_rainha.png" />
+    <EmbeddedResource Include="assets\rainha.ico" LogicalName="Rainha.rainha.ico" />
+    <EmbeddedResource Include="Templates\Prova de Excel para Aprendiz.xlsx" LogicalName="Rainha.Template.Prova de Excel para Aprendiz.xlsx" />
+    <EmbeddedResource Include="Templates\Prova de Excel Avançado.xlsx" LogicalName="Rainha.Template.Prova de Excel Avançado.xlsx" />
+  </ItemGroup>
+
+</Project>
