@@ -38,14 +38,14 @@ internal static class Program
             return 0;
         }
 
-        // Inicialização normal do Launcher: garante pastas, templates e atalho no Desktop
+        // Inicialização normal do Launcher: garante pastas, templates e atalho "Testes - Rainha" no Desktop
         AppConfigAndStorage.EnsureDirectoriesAndDefaultTemplates();
         string exePath = Environment.ProcessPath ?? Path.Combine(AppConfigAndStorage.BaseDirectory, AppConfigAndStorage.InstalledExeName);
-        string desktopShortcut = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
-            AppConfigAndStorage.ShortcutName);
+        string desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        string desktopShortcut = Path.Combine(desktopDir, AppConfigAndStorage.ShortcutName);
+        string legacyShortcut = Path.Combine(desktopDir, AppConfigAndStorage.LegacyShortcutName);
 
-        if (!File.Exists(desktopShortcut))
+        if (!File.Exists(desktopShortcut) || File.Exists(legacyShortcut))
         {
             AppConfigAndStorage.CreateDesktopShortcut(exePath, AppConfigAndStorage.BaseDirectory);
         }

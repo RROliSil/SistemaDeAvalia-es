@@ -25,7 +25,8 @@ public record ExamHistoryEntry(
 public static class AppConfigAndStorage
 {
     public const string DefaultInstallDir = @"C:\RainhaProvasExcel";
-    public const string ShortcutName = "Provas de Excel - Rainha.lnk";
+    public const string ShortcutName = "Testes - Rainha.lnk";
+    public const string LegacyShortcutName = "Provas de Excel - Rainha.lnk";
     public const string InstalledExeName = "RainhaLauncherProvas.exe";
 
     public static string BaseDirectory
@@ -359,6 +360,14 @@ public static class AppConfigAndStorage
         try
         {
             string desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+
+            // Remove o atalho antigo caso exista
+            string legacyPath = Path.Combine(desktopDir, LegacyShortcutName);
+            if (File.Exists(legacyPath))
+            {
+                try { File.Delete(legacyPath); } catch { }
+            }
+
             string shortcutPath = Path.Combine(desktopDir, ShortcutName);
             string iconPath = Path.Combine(workingDir, "assets", "rainha.ico");
 

@@ -99,7 +99,7 @@ public class InstallerForm : Form
         {
             Text = "✔ Todas as dependências já estão embutidas neste executável\n" +
                    "✔ Cria as pastas 'Templates' (com modelos de prova) e 'Provas Feitas'\n" +
-                   "✔ Cria o atalho 'Provas de Excel - Rainha' na Área de Trabalho",
+                   "✔ Cria o atalho 'Testes - Rainha' na Área de Trabalho",
             Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
             ForeColor = Color.FromArgb(80, 70, 65),
             Location = new Point(28, 204),
@@ -150,7 +150,7 @@ public class InstallerForm : Form
                 $"📁 Pasta do Sistema: {finalDir}\n" +
                 $"📂 Pasta de Templates: {Path.Combine(finalDir, "Templates")}\n" +
                 $"💾 Pasta de Provas Feitas: {Path.Combine(finalDir, "Provas Feitas")}\n" +
-                $"🖥️ Atalho criado na Área de Trabalho: 'Provas de Excel - Rainha'",
+                $"🖥️ Atalho criado na Área de Trabalho: 'Testes - Rainha'",
                 "Instalação Concluída - Rainha",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);

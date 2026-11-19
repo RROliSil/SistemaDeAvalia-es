@@ -147,7 +147,7 @@ public class MainForm : Form
             string exePath = Environment.ProcessPath ?? Path.Combine(AppConfigAndStorage.BaseDirectory, AppConfigAndStorage.InstalledExeName);
             AppConfigAndStorage.CreateDesktopShortcut(exePath, AppConfigAndStorage.BaseDirectory);
             MessageBox.Show(
-                "Atalho 'Provas de Excel - Rainha' criado/atualizado com sucesso na Área de Trabalho!",
+                "Atalho 'Testes - Rainha' criado/atualizado com sucesso na Área de Trabalho!",
                 "Atalho Criado",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);

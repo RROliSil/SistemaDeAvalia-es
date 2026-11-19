@@ -53,11 +53,12 @@ respostas ao fechar o Excel.
        sufixo incremental "(2)", "(3)", garantindo que nenhuma prova feita seja
        sobrescrita.
 
-[RN05] Salvamento Automático ao Fechar o Excel (Mesmo sem clicar em Salvar):
+[RN05] Salvamento Automático ao Fechar o Excel e na Troca de Abas:
        O Launcher controla a instância do Microsoft Excel via automação COM e
-       intercepta o evento nativo "WorkbookBeforeClose" (DispId 1570 da interface
-       AppEvents {00024413-0000-0000-C000-000000000046}) e "WorkbookBeforeSave"
-       (DispId 1571).
+       intercepta os eventos nativos "WorkbookBeforeClose" (DispId 1570),
+       "WorkbookBeforeSave" (DispId 1571) e "WorkbookSheetDeactivate" (DispId
+       1562) da interface AppEvents ({00024413-0000-0000-C000-000000000046}).
+       - A cada troca de aba (questão), salva silenciosamente em segundo plano.
        - Se o candidato clicar em Salvar durante a prova: salva normalmente no
          arquivo dele na pasta "Provas Feitas".
        - Se o candidato apenas fechar o Excel clicando no "X" sem salvar: o
@@ -65,19 +66,24 @@ respostas ao fechar o Excel.
          define "Workbook.Saved = true", salvando todas as respostas sem exibir
          a caixa de diálogo "Deseja salvar as alterações?" (evitando que o
          candidato clique em "Não Salvar").
+       - O monitoramento utiliza validação nativa Win32 (IsWindow(_excelHwnd)),
+         garantindo que o Modo de Edição de Célula durante a digitação do
+         candidato nunca seja interpretado como fechamento da planilha.
 
 [RN06] Fechamento pelo Botão do Launcher:
        Enquanto a prova está aberta, o Launcher exibe o painel "Prova em
        Andamento" com o nome do candidato, nome da prova, cronômetro de tempo
        decorrido e o botão "Finalizar e Salvar Prova Agora", que também força o
-       salvamento e encerra o Excel com segurança.
+       salvamento (mesmo se uma célula estiver em edição via WM_CLOSE) e
+       encerra o Excel com segurança.
 
-[RN07] Instalação Única e Atalho na Área de Trabalho:
+[RN07] Instalação Única e Atalho "Testes - Rainha" na Área de Trabalho:
        O executável "Instalador_Rainha_Provas.exe" (ou o próprio Launcher em
        sua primeira execução) instala o sistema em "C:\RainhaProvasExcel",
        extrai os templates iniciais na pasta "Templates", cria a pasta
-       "Provas Feitas" e gera automaticamente o atalho "Provas de Excel - Rainha"
-       na Área de Trabalho com o ícone oficial da Rainha.
+       "Provas Feitas" e gera automaticamente o atalho "Testes - Rainha"
+       na Área de Trabalho com o ícone oficial da Rainha (removendo atalhos
+       antigos caso existam).
 
 [RN08] Registro Automático de Histórico e Auditoria:
        Ao término de cada prova, o sistema grava os metadados da avaliação

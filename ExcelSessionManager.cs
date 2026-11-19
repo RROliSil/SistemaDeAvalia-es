@@ -1,6 +1,6 @@
 using System;
+using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
@@ -16,6 +16,11 @@ namespace RainhaLauncherProvas;
 [InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
 public interface IExcelAppEvents
 {
+    [DispId(1562)]
+    void WorkbookSheetDeactivate(
+        [In, MarshalAs(UnmanagedType.IDispatch)] object Wb,
+        [In, MarshalAs(UnmanagedType.IDispatch)] object Sh);
+
     [DispId(1570)]
     void WorkbookBeforeClose(
         [In, MarshalAs(UnmanagedType.IDispatch)] object Wb,
@@ -29,7 +34,7 @@ public interface IExcelAppEvents
 }
 
 /// <summary>
-/// Receptor COM (Sink) que intercepta o fechamento do Excel para garantir o salvamento automático
+/// Receptor COM (Sink) que intercepta eventos do Excel para garantir o salvamento automático
 /// na pasta de Provas Feitas mesmo se o candidato apenas clicar no "X" sem salvar.
 /// </summary>
 [ComVisible(true)]
@@ -44,6 +49,19 @@ public class ExcelAppEventSink : IExcelAppEvents
         _manager = manager;
     }
 
+    public void WorkbookSheetDeactivate(object Wb, object Sh)
+    {
+        // Salva silenciosamente a cada troca de aba (questão) como backup preventivo
+        try
+        {
+            dynamic workbook = Wb;
+            workbook.Save();
+        }
+        catch
+        {
+        }
+    }
+
     public void WorkbookBeforeClose(object Wb, ref bool Cancel)
     {
         _manager.OnWorkbookBeforeClose(Wb, ref Cancel);
@@ -51,7 +69,6 @@ public class ExcelAppEventSink : IExcelAppEvents
 
     public void WorkbookBeforeSave(object Wb, bool SaveAsUI, ref bool Cancel)
     {
-        // Se o candidato tentar usar "Salvar Como" para outro lugar, garantimos que salve também no arquivo oficial da prova
         if (SaveAsUI)
         {
             try
@@ -61,7 +78,6 @@ public class ExcelAppEventSink : IExcelAppEvents
             }
             catch
             {
-                // Ignora erros caso não esteja pronto
             }
         }
     }
@@ -78,7 +94,14 @@ public class ExcelSessionManager : IDisposable
     [DllImport("user32.dll")]
     private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
+    [DllImport("user32.dll")]
+    private static extern bool IsWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
     private const int SW_MAXIMIZE = 3;
+    private const uint WM_CLOSE = 0x0010;
 
     private dynamic? _excelApp;
     private dynamic? _workbook;
@@ -86,6 +109,7 @@ public class ExcelSessionManager : IDisposable
     private int _adviseCookie;
     private ExcelAppEventSink? _eventSink;
     private System.Threading.Timer? _monitorTimer;
+    private IntPtr _excelHwnd;
     private uint _excelProcessId;
     private int _sessionClosedSignaled;
 
@@ -134,7 +158,6 @@ public class ExcelSessionManager : IDisposable
             }
             catch
             {
-                // Se não puder alterar atributo do template, segue normalmente
             }
         }
 
@@ -173,24 +196,24 @@ public class ExcelSessionManager : IDisposable
         // Sempre posiciona na primeira aba visível da planilha e no topo (A1)
         ActivateFirstVisibleWorksheet();
 
-        // Maximiza e traz a janela do Excel para a frente
+        // Maximiza e traz a janela do Excel para a frente, capturando Hwnd e ProcessId
         try
         {
-            IntPtr hwnd = (IntPtr)(int)_excelApp.Hwnd;
-            if (hwnd != IntPtr.Zero)
+            long hwndVal = Convert.ToInt64(_excelApp.Hwnd);
+            _excelHwnd = new IntPtr(hwndVal);
+            if (_excelHwnd != IntPtr.Zero)
             {
-                GetWindowThreadProcessId(hwnd, out _excelProcessId);
-                ShowWindow(hwnd, SW_MAXIMIZE);
-                SetForegroundWindow(hwnd);
+                GetWindowThreadProcessId(_excelHwnd, out _excelProcessId);
+                ShowWindow(_excelHwnd, SW_MAXIMIZE);
+                SetForegroundWindow(_excelHwnd);
             }
         }
         catch
         {
-            // Ignora falha ao maximizar
         }
 
-        // 5. Inicia monitoramento para detectar quando o candidato fechou o Excel
-        _monitorTimer = new System.Threading.Timer(MonitorExcelCallback, null, 800, 800);
+        // 5. Inicia monitoramento para detectar exclusivamente quando o candidato fechou o Excel
+        _monitorTimer = new System.Threading.Timer(MonitorExcelCallback, null, 1000, 1000);
     }
 
     /// <summary>
@@ -199,7 +222,9 @@ public class ExcelSessionManager : IDisposable
     /// </summary>
     private void ActivateFirstVisibleWorksheet()
     {
-        if (_workbook == null || _excelApp == null)
+        var wb = _workbook;
+        var app = _excelApp;
+        if (wb == null || app == null)
             return;
 
         try
@@ -207,12 +232,12 @@ public class ExcelSessionManager : IDisposable
             const int xlSheetVisible = -1;
             const int xlFirst = 1;
 
-            int sheetCount = (int)_workbook.Worksheets.Count;
+            int sheetCount = (int)wb.Worksheets.Count;
             dynamic? firstVisibleSheet = null;
 
             for (int i = 1; i <= sheetCount; i++)
             {
-                dynamic ws = _workbook.Worksheets.Item(i);
+                dynamic ws = wb.Worksheets.Item(i);
                 try
                 {
                     if ((int)ws.Visible == xlSheetVisible)
@@ -234,24 +259,27 @@ public class ExcelSessionManager : IDisposable
 
                 try
                 {
-                    // Rola a barra inferior de abas totalmente para a esquerda (primeira aba)
-                    _excelApp.ActiveWindow.ScrollWorkbookTabs(Position: xlFirst);
+                    app.ActiveWindow.ScrollWorkbookTabs(Position: xlFirst);
                 }
                 catch { }
 
                 try
                 {
-                    // Posiciona a visualização no topo esquerdo da aba e seleciona A1
-                    _excelApp.ActiveWindow.ScrollRow = 1;
-                    _excelApp.ActiveWindow.ScrollColumn = 1;
+                    app.ActiveWindow.ScrollRow = 1;
+                    app.ActiveWindow.ScrollColumn = 1;
                     firstVisibleSheet.Range("A1").Select();
+                }
+                catch { }
+
+                try
+                {
+                    wb.Save();
                 }
                 catch { }
             }
         }
         catch
         {
-            // Ignora caso a planilha esteja protegida contra seleção de células
         }
     }
 
@@ -267,13 +295,11 @@ public class ExcelSessionManager : IDisposable
                 {
                     _eventSink = new ExcelAppEventSink(this);
                     _connectionPoint.Advise(_eventSink, out _adviseCookie);
-                    Console.WriteLine($"COM_ADVISE_OK: cookie={_adviseCookie}");
                 }
             }
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine($"COM_ADVISE_ERR: {ex.Message}");
         }
     }
 
@@ -288,12 +314,11 @@ public class ExcelSessionManager : IDisposable
         }
         catch
         {
-            // Se o Excel estiver em algum estado transitório, tenta via workbook principal
             try
             {
-                _workbook?.Save();
                 if (_workbook != null)
                 {
+                    _workbook.Save();
                     _workbook.Saved = true;
                 }
             }
@@ -304,10 +329,11 @@ public class ExcelSessionManager : IDisposable
     }
 
     /// <summary>
-    /// Chamado caso o candidato clique no botão "Finalizar e Salvar Prova" diretamente no Launcher.
+    /// Chamado caso o candidato clique no botão "Finalizar e Salvar Prova Agora" diretamente no Launcher.
     /// </summary>
     public void SaveAndCloseSession()
     {
+        bool savedDirectly = false;
         try
         {
             if (_workbook != null)
@@ -315,25 +341,59 @@ public class ExcelSessionManager : IDisposable
                 _workbook.Save();
                 _workbook.Saved = true;
                 _workbook.Close(true);
+                savedDirectly = true;
             }
         }
         catch
         {
-        }
-
-        try
-        {
-            if (_excelApp != null)
+            // Se o candidato estava com o cursor piscando dentro de uma célula (Modo de Edição),
+            // enviamos WM_CLOSE para a janela do Excel confirmar a célula e acionar o WorkbookBeforeClose.
+            if (_excelHwnd != IntPtr.Zero && IsWindow(_excelHwnd))
             {
-                _excelApp.DisplayAlerts = false;
-                _excelApp.Quit();
+                PostMessage(_excelHwnd, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+                return;
             }
         }
-        catch
+
+        if (savedDirectly)
         {
+            try
+            {
+                if (_excelApp != null)
+                {
+                    _excelApp.DisplayAlerts = false;
+                    _excelApp.Quit();
+                }
+            }
+            catch
+            {
+            }
+
+            SignalSessionClosed();
+        }
+    }
+
+    private bool IsExcelWindowOrProcessAlive()
+    {
+        if (_excelHwnd != IntPtr.Zero)
+        {
+            return IsWindow(_excelHwnd);
         }
 
-        SignalSessionClosed();
+        if (_excelProcessId != 0)
+        {
+            try
+            {
+                using var proc = Process.GetProcessById((int)_excelProcessId);
+                return !proc.HasExited;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     private void MonitorExcelCallback(object? state)
@@ -341,78 +401,44 @@ public class ExcelSessionManager : IDisposable
         if (_sessionClosedSignaled == 1)
             return;
 
-        bool isStillOpen = false;
+        // 1. Se a janela nativa do Excel ou o processo já tiver sido encerrado, finaliza a sessão
+        if (!IsExcelWindowOrProcessAlive())
+        {
+            SignalSessionClosed();
+            return;
+        }
 
+        // 2. A janela do Excel está aberta. Verifica se o candidato fechou apenas a planilha
+        // deixando a janela do Excel vazia (Workbooks.Count == 0).
+        // IMPORTANTE: Se o candidato estiver digitando em uma célula, o Excel rejeita chamadas COM
+        // lançando RuntimeBinderException ou COMException. Enquanto a janela do Excel existir,
+        // qualquer exceção COM significa que o candidato está digitando/editando — NUNCA que fechou!
         try
         {
-            if (_excelApp != null)
-            {
-                // Verifica se o processo do Excel ainda existe
-                if (_excelProcessId != 0)
-                {
-                    try
-                    {
-                        var proc = System.Diagnostics.Process.GetProcessById((int)_excelProcessId);
-                        if (proc.HasExited)
-                        {
-                            isStillOpen = false;
-                            SignalSessionClosed();
-                            return;
-                        }
-                    }
-                    catch
-                    {
-                        SignalSessionClosed();
-                        return;
-                    }
-                }
+            var app = _excelApp;
+            if (app == null)
+                return;
 
-                // Verifica se ainda há algum Workbook aberto na instância do Excel
-                int count = (int)_excelApp.Workbooks.Count;
-                if (count > 0)
-                {
-                    isStillOpen = true;
-                }
-                else
-                {
-                    // O candidato fechou a planilha mas a janela vazia do Excel ficou aberta:
-                    // fechamos a instância vazia do Excel automaticamente.
-                    try
-                    {
-                        _excelApp.DisplayAlerts = false;
-                        _excelApp.Quit();
-                    }
-                    catch
-                    {
-                    }
-                    isStillOpen = false;
-                }
-            }
-        }
-        catch (COMException comEx)
-        {
-            // RPC_E_CALL_REJECTED (0x80010001) ocorre quando o candidato está digitando dentro de uma célula!
-            // Nesse caso o Excel AINDA ESTÁ ABERTO e em uso.
-            const int RPC_E_CALL_REJECTED = unchecked((int)0x80010001);
-            const int VBA_E_IGNORE = unchecked((int)0x800AC472);
-            if (comEx.ErrorCode == RPC_E_CALL_REJECTED || comEx.ErrorCode == VBA_E_IGNORE)
+            int count = (int)app.Workbooks.Count;
+            if (count == 0)
             {
-                isStillOpen = true;
-            }
-            else
-            {
-                // Qualquer outro erro RPC (como RPC_S_SERVER_UNAVAILABLE) significa que o Excel foi fechado
-                isStillOpen = false;
+                // O candidato fechou a planilha (que já foi salva pelo WorkbookBeforeClose),
+                // então fechamos a janela vazia do Excel e concluímos a prova.
+                try
+                {
+                    app.DisplayAlerts = false;
+                    app.Quit();
+                }
+                catch
+                {
+                }
+                SignalSessionClosed();
             }
         }
         catch
         {
-            isStillOpen = false;
-        }
-
-        if (!isStillOpen)
-        {
-            SignalSessionClosed();
+            // O candidato está digitando dentro de uma célula ou com menu/fórmula em edição no Excel.
+            // Como IsExcelWindowOrProcessAlive() é true, a prova continua normalmente em andamento!
         }
     }
 
