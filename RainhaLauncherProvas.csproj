@@ -8,7 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>assets\rainha.ico</ApplicationIcon>
     <AssemblyName>RainhaLauncherProvas</AssemblyName>
-    <Product>Rainha - Sistema de Provas de Excel</Product>
+    <Product>Rainha - Sistema de Avaliações de Excel</Product>
     <Company>Rainha</Company>
     <Version>1.0.0</Version>
   </PropertyGroup>

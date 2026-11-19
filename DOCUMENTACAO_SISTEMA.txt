@@ -1,15 +1,15 @@
 ================================================================================
-DOCUMENTAÇÃO DO SISTEMA - RAINHA: CENTRAL DE PROVAS DE EXCEL
-Última Atualização: 18/11/2026
-Versão: 1.0.0
+DOCUMENTAÇÃO DO SISTEMA - RAINHA: CENTRAL DE AVALIAÇÕES DE EXCEL
+Última Atualização: 19/11/2026
+Versão: 1.1.0
 ================================================================================
 
 1. VISÃO GERAL DO SISTEMA
 --------------------------------------------------------------------------------
-O "Rainha - Central de Provas de Excel" é um sistema desktop (Launcher + Instalador
-Único) desenvolvido em C# (.NET 10 Windows Forms, Self-Contained Single-File)
-para aplicação automatizada e segura de avaliações práticas de Microsoft Excel
-(ex.: Prova de Excel para Aprendiz, Prova de Excel Avançado).
+O "Rainha - Central de Avaliações de Excel" é um sistema desktop (Launcher +
+Instalador Único) desenvolvido em C# (.NET 10 Windows Forms, Self-Contained
+Single-File) para aplicação automatizada e segura de avaliações práticas de
+Microsoft Excel (ex.: Teste Excel - Aprendiz, Teste Excel - Aux Administrativo).
 
 O sistema elimina a necessidade de instalar dependências externas (possui o
 runtime .NET, logotipo, ícone e templates iniciais embutidos no próprio .exe)
@@ -71,28 +71,28 @@ respostas ao fechar o Excel.
          candidato nunca seja interpretado como fechamento da planilha.
 
 [RN06] Fechamento pelo Botão do Launcher:
-       Enquanto a prova está aberta, o Launcher exibe o painel "Prova em
-       Andamento" com o nome do candidato, nome da prova, cronômetro de tempo
-       decorrido e o botão "Finalizar e Salvar Prova Agora", que também força o
+       Enquanto a avaliação está aberta, o Launcher exibe o painel "Avaliação em
+       Andamento" com o nome do candidato, nome da avaliação, cronômetro de tempo
+       decorrido e o botão "Finalizar e Salvar Avaliação Agora", que também força o
        salvamento (mesmo se uma célula estiver em edição via WM_CLOSE) e
        encerra o Excel com segurança.
 
-[RN07] Instalação Única e Atalho "Testes - Rainha" na Área de Trabalho:
+[RN07] Instalação Única e Atalho "Avaliações - Rainha" na Área de Trabalho:
        O executável "Instalador_Rainha_Provas.exe" (ou o próprio Launcher em
        sua primeira execução) instala o sistema em "C:\RainhaProvasExcel",
        extrai os templates iniciais na pasta "Templates", cria a pasta
-       "Provas Feitas" e gera automaticamente o atalho "Testes - Rainha"
+       "Provas Feitas" e gera automaticamente o atalho "Avaliações - Rainha"
        na Área de Trabalho com o ícone oficial da Rainha (removendo atalhos
        antigos caso existam).
 
 [RN08] Registro Automático de Histórico e Auditoria:
-       Ao término de cada prova, o sistema grava os metadados da avaliação
-       (ID, Nome Completo, Prova Realizada, Arquivo Salvo, Data/Hora de Início,
+       Ao término de cada avaliação, o sistema grava os metadados da avaliação
+       (ID, Nome Completo, Avaliação Realizada, Arquivo Salvo, Data/Hora de Início,
        Data/Hora de Fim, Duração em Segundos e Status) nos arquivos de banco
        local "banco_provas.json" e "historico_provas.csv".
 
 [RN09] Abertura Obrigatória na Primeira Aba Visível:
-       Sempre que uma prova é iniciada, o sistema localiza automaticamente a
+       Sempre que uma avaliação é iniciada, o sistema localiza automaticamente a
        primeira aba visível da pasta de trabalho (Worksheets[1]), executa o
        comando Activate(), rola a barra inferior de abas totalmente para a
        esquerda (ScrollWorkbookTabs Position: xlFirst) e posiciona a tela no
@@ -100,13 +100,13 @@ respostas ao fechar o Excel.
        estava ativa quando o arquivo template foi salvo originalmente.
 
 [RN10] Controle de Acesso por Senha nas Pastas (Ícone de Cadeado 🔒):
-       Os menus "Abrir Pasta de Provas Feitas" e "Pasta de Templates" ficam
+       Os menus "Abrir Pasta de Avaliações Feitas" e "Pasta de Templates" ficam
        protegidos dentro do botão com ícone de cadeado (🔒) no rodapé do
        Launcher. Ao clicar no cadeado, o sistema exige a senha administrativa:
        - Senha inicial padrão: 7272 (validada via hash SHA-256).
-       - Após o desbloqueio, o painel exibe os botões "📁 Abrir Pasta de Provas
-         Feitas", "📂 Pasta de Templates", além da seção para definir uma nova
-         senha ou resetar a senha de volta para o padrão inicial (7272).
+       - Após o desbloqueio, o painel exibe os botões "📁 Abrir Pasta de
+         Avaliações Feitas", "📂 Pasta de Templates", além da seção para definir
+         uma nova senha ou resetar a senha de volta para o padrão inicial (7272).
 
 
 4. ESTRUTURA DO BANCO DE DADOS E DIRETÓRIOS

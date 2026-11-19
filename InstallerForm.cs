@@ -20,7 +20,7 @@ public class InstallerForm : Form
 
     public InstallerForm()
     {
-        Text = "Instalador - Rainha Sistema de Provas de Excel";
+        Text = "Instalador - Rainha Sistema de Avaliações de Excel";
         Size = new Size(560, 410);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         StartPosition = FormStartPosition.CenterScreen;
@@ -49,7 +49,7 @@ public class InstallerForm : Form
 
         var lblTitle = new Label
         {
-            Text = "Instalador Único - Provas de Excel",
+            Text = "Instalador Único - Avaliações de Excel",
             Font = new Font("Segoe UI", 14F, FontStyle.Bold),
             ForeColor = BrandRed,
             Location = new Point(215, 24),
@@ -59,7 +59,7 @@ public class InstallerForm : Form
 
         var lblSub = new Label
         {
-            Text = "Configura automaticamente o Launcher, pastas de Templates,\npasta de Provas Feitas e cria o atalho na Área de Trabalho.",
+            Text = "Configura automaticamente o Launcher, pastas de Templates,\npasta de Avaliações Feitas e cria o atalho na Área de Trabalho.",
             Font = new Font("Segoe UI", 9.25F, FontStyle.Regular),
             ForeColor = TextDark,
             Location = new Point(215, 54),
@@ -78,7 +78,7 @@ public class InstallerForm : Form
 
         var lblDir = new Label
         {
-            Text = "Pasta de Instalação do Sistema (Templates e Provas Feitas ficarão aqui):",
+            Text = "Pasta de Instalação do Sistema (Templates e Avaliações Feitas ficarão aqui):",
             Font = new Font("Segoe UI", 9.75F, FontStyle.Bold),
             ForeColor = TextDark,
             Location = new Point(28, 136),
@@ -98,8 +98,8 @@ public class InstallerForm : Form
         var lblFeatures = new Label
         {
             Text = "✔ Todas as dependências já estão embutidas neste executável\n" +
-                   "✔ Cria as pastas 'Templates' (com modelos de prova) e 'Provas Feitas'\n" +
-                   "✔ Cria o atalho 'Testes - Rainha' na Área de Trabalho",
+                   "✔ Cria as pastas 'Templates' (com modelos de avaliação) e 'Provas Feitas'\n" +
+                   "✔ Cria o atalho 'Avaliações - Rainha' na Área de Trabalho",
             Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
             ForeColor = Color.FromArgb(80, 70, 65),
             Location = new Point(28, 204),
@@ -109,7 +109,7 @@ public class InstallerForm : Form
 
         _chkOpenAfterInstall = new CheckBox
         {
-            Text = "Abrir o Launcher de Provas após concluir a instalação",
+            Text = "Abrir o Launcher de Avaliações após concluir a instalação",
             Font = new Font("Segoe UI", 9.75F, FontStyle.Bold),
             ForeColor = TextDark,
             Checked = true,
@@ -149,8 +149,8 @@ public class InstallerForm : Form
                 $"Instalação concluída com sucesso!\n\n" +
                 $"📁 Pasta do Sistema: {finalDir}\n" +
                 $"📂 Pasta de Templates: {Path.Combine(finalDir, "Templates")}\n" +
-                $"💾 Pasta de Provas Feitas: {Path.Combine(finalDir, "Provas Feitas")}\n" +
-                $"🖥️ Atalho criado na Área de Trabalho: 'Testes - Rainha'",
+                $"💾 Pasta de Avaliações Feitas: {Path.Combine(finalDir, "Provas Feitas")}\n" +
+                $"🖥️ Atalho criado na Área de Trabalho: 'Avaliações - Rainha'",
                 "Instalação Concluída - Rainha",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);

@@ -77,7 +77,7 @@ public class AdminLockDialog : Form
 
         var lblLockSub = new Label
         {
-            Text = "Digite a senha de administrador para acessar as pastas de\nProvas Feitas, Pasta de Templates e configurações de senha:",
+            Text = "Digite a senha de administrador para acessar as pastas de\nAvaliações Feitas, Pasta de Templates e configurações de senha:",
             Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
             ForeColor = TextDark,
             Location = new Point(28, 56),
@@ -168,7 +168,7 @@ public class AdminLockDialog : Form
 
         var btnOpenCompleted = new Button
         {
-            Text = "📁 Abrir Pasta de Provas Feitas",
+            Text = "📁 Abrir Pasta de Avaliações Feitas",
             Font = new Font("Segoe UI", 10.5F, FontStyle.Bold),
             Location = new Point(26, 80),
             Size = new Size(412, 44),

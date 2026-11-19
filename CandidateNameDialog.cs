@@ -51,7 +51,7 @@ public class CandidateNameDialog : Form
 
         var lblTitle = new Label
         {
-            Text = "Identificação para Início da Prova",
+            Text = "Identificação para Início da Avaliação",
             Font = new Font("Segoe UI", 14F, FontStyle.Bold),
             ForeColor = BrandRed,
             AutoSize = false,
@@ -62,7 +62,7 @@ public class CandidateNameDialog : Form
 
         var lblExam = new Label
         {
-            Text = $"Prova selecionada: {selectedExamName}",
+            Text = $"Avaliação selecionada: {selectedExamName}",
             Font = new Font("Segoe UI Semibold", 10.5F, FontStyle.Bold),
             ForeColor = BrandOrange,
             AutoSize = false,
@@ -73,7 +73,7 @@ public class CandidateNameDialog : Form
 
         var lblPrompt = new Label
         {
-            Text = "Digite seu NOME COMPLETO abaixo:\n(Seu nome será usado para salvar sua prova automaticamente)",
+            Text = "Digite seu NOME COMPLETO abaixo:\n(Seu nome será usado para salvar sua avaliação automaticamente)",
             Font = new Font("Segoe UI", 9.75F, FontStyle.Regular),
             ForeColor = TextDark,
             AutoSize = false,
@@ -107,7 +107,7 @@ public class CandidateNameDialog : Form
         {
             Text = "Cancelar",
             Font = new Font("Segoe UI", 10F, FontStyle.Regular),
-            Location = new Point(216, 218),
+            Location = new Point(192, 218),
             Size = new Size(110, 42),
             FlatStyle = FlatStyle.Flat,
             BackColor = Color.White,
@@ -124,10 +124,10 @@ public class CandidateNameDialog : Form
 
         var btnConfirm = new Button
         {
-            Text = "Iniciar Prova",
+            Text = "Iniciar Avaliação",
             Font = new Font("Segoe UI", 10.5F, FontStyle.Bold),
-            Location = new Point(336, 218),
-            Size = new Size(120, 42),
+            Location = new Point(312, 218),
+            Size = new Size(144, 42),
             FlatStyle = FlatStyle.Flat,
             BackColor = BrandRed,
             ForeColor = Color.White,

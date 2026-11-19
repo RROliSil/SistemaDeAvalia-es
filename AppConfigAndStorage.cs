@@ -30,8 +30,12 @@ public record AdminConfigData(
 public static class AppConfigAndStorage
 {
     public const string DefaultInstallDir = @"C:\RainhaProvasExcel";
-    public const string ShortcutName = "Testes - Rainha.lnk";
-    public const string LegacyShortcutName = "Provas de Excel - Rainha.lnk";
+    public const string ShortcutName = "Avaliações - Rainha.lnk";
+    public static readonly string[] LegacyShortcutNames = new[]
+    {
+        "Testes - Rainha.lnk",
+        "Provas de Excel - Rainha.lnk"
+    };
     public const string InstalledExeName = "RainhaLauncherProvas.exe";
     public const string DefaultAdminPassword = "7272";
 
@@ -418,11 +422,14 @@ public static class AppConfigAndStorage
         {
             string desktopDir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
 
-            // Remove o atalho antigo caso exista
-            string legacyPath = Path.Combine(desktopDir, LegacyShortcutName);
-            if (File.Exists(legacyPath))
+            // Remove atalhos antigos caso existam
+            foreach (string legacyName in LegacyShortcutNames)
             {
-                try { File.Delete(legacyPath); } catch { }
+                string legacyPath = Path.Combine(desktopDir, legacyName);
+                if (File.Exists(legacyPath))
+                {
+                    try { File.Delete(legacyPath); } catch { }
+                }
             }
 
             string shortcutPath = Path.Combine(desktopDir, ShortcutName);
@@ -436,7 +443,7 @@ public static class AppConfigAndStorage
             dynamic shortcut = shell.CreateShortcut(shortcutPath);
             shortcut.TargetPath = targetExePath;
             shortcut.WorkingDirectory = workingDir;
-            shortcut.Description = "Rainha - Sistema de Aplicação de Provas de Excel";
+            shortcut.Description = "Rainha - Sistema de Aplicação de Avaliações de Excel";
             if (File.Exists(iconPath))
             {
                 shortcut.IconLocation = $"{iconPath},0";

@@ -34,7 +34,7 @@ public class MainForm : Form
 
     public MainForm()
     {
-        Text = "Rainha - Central de Provas de Excel";
+        Text = "Rainha - Central de Avaliações de Excel";
         Size = new Size(760, 620);
         MinimumSize = new Size(720, 580);
         StartPosition = FormStartPosition.CenterScreen;
@@ -72,18 +72,18 @@ public class MainForm : Form
             ForeColor = BrandRed,
             AutoSize = false,
             Location = new Point(265, 28),
-            Size = new Size(460, 34)
+            Size = new Size(475, 34)
         };
         headerPanel.Controls.Add(lblHeaderTitle);
 
         var lblHeaderSubtitle = new Label
         {
-            Text = "Selecione abaixo a prova que você irá realizar.\nAo finalizar ou fechar o Excel, sua prova será salva automaticamente com seu nome.",
+            Text = "Selecione abaixo a avaliação que você irá realizar.\nAo finalizar ou fechar o Excel, sua avaliação será salva automaticamente.",
             Font = new Font("Segoe UI", 9.75F, FontStyle.Regular),
             ForeColor = TextMuted,
             AutoSize = false,
             Location = new Point(265, 64),
-            Size = new Size(460, 44)
+            Size = new Size(475, 44)
         };
         headerPanel.Controls.Add(lblHeaderSubtitle);
 
@@ -134,7 +134,7 @@ public class MainForm : Form
         };
         btnAdminLock.FlatAppearance.BorderSize = 0;
         var toolTip = new ToolTip();
-        toolTip.SetToolTip(btnAdminLock, "Acesso Restrito (Provas Feitas, Pasta de Templates e Senha)");
+        toolTip.SetToolTip(btnAdminLock, "Acesso Restrito (Avaliações Feitas, Pasta de Templates e Senha)");
         btnAdminLock.Click += (s, e) =>
         {
             using var lockDlg = new AdminLockDialog();
@@ -157,14 +157,14 @@ public class MainForm : Form
             string exePath = Environment.ProcessPath ?? Path.Combine(AppConfigAndStorage.BaseDirectory, AppConfigAndStorage.InstalledExeName);
             AppConfigAndStorage.CreateDesktopShortcut(exePath, AppConfigAndStorage.BaseDirectory);
             MessageBox.Show(
-                "Atalho 'Testes - Rainha' criado/atualizado com sucesso na Área de Trabalho!",
+                "Atalho 'Avaliações - Rainha' criado/atualizado com sucesso na Área de Trabalho!",
                 "Atalho Criado",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
         };
         footerPanel.Controls.Add(btnShortcut);
 
-        // 3. Container Principal de Seleção de Provas
+        // 3. Container Principal de Seleção de Avaliações
         _selectionContainer = new Panel
         {
             Dock = DockStyle.Fill,
@@ -174,7 +174,7 @@ public class MainForm : Form
 
         var lblSectionTitle = new Label
         {
-            Text = "📋 Escolha a Prova para Iniciar:",
+            Text = "📋 Escolha a Avaliação para Iniciar:",
             Font = new Font("Segoe UI", 12.5F, FontStyle.Bold),
             ForeColor = TextDark,
             Dock = DockStyle.Top,
@@ -195,7 +195,7 @@ public class MainForm : Form
         _selectionContainer.Controls.Add(_examsListPanel);
         _selectionContainer.Controls.Add(lblSectionTitle);
 
-        // 4. Painel de "Prova em Andamento" (exibido enquanto o Excel está aberto)
+        // 4. Painel de "Avaliação em Andamento" (exibido enquanto o Excel está aberto)
         _activeSessionPanel = new Panel
         {
             Dock = DockStyle.Fill,
@@ -217,7 +217,7 @@ public class MainForm : Form
 
         var lblInProgressBadge = new Label
         {
-            Text = "⏳ PROVA EM ANDAMENTO NO EXCEL",
+            Text = "⏳ AVALIAÇÃO EM ANDAMENTO NO EXCEL",
             Font = new Font("Segoe UI", 14F, FontStyle.Bold),
             ForeColor = BrandRed,
             TextAlign = ContentAlignment.MiddleCenter,
@@ -237,7 +237,7 @@ public class MainForm : Form
 
         _lblActiveExam = new Label
         {
-            Text = "Prova: -",
+            Text = "Avaliação: -",
             Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold),
             ForeColor = BrandOrange,
             TextAlign = ContentAlignment.MiddleCenter,
@@ -267,7 +267,7 @@ public class MainForm : Form
 
         var lblSaveNote = new Label
         {
-            Text = "💡 Você pode fechar o Excel normalmente no 'X' ao terminar ou clicar no botão abaixo.\nSua prova será salva automaticamente na pasta de Provas Feitas com seu nome completo.",
+            Text = "💡 Você pode fechar o Excel normalmente no 'X' ao terminar ou clicar no botão abaixo.\nSua avaliação será salva automaticamente com seu nome completo.",
             Font = new Font("Segoe UI", 9.75F, FontStyle.Regular),
             ForeColor = TextMuted,
             TextAlign = ContentAlignment.MiddleCenter,
@@ -283,9 +283,9 @@ public class MainForm : Form
 
         var btnFinishAndSave = new Button
         {
-            Text = "✅ Finalizar e Salvar Prova Agora",
+            Text = "✅ Finalizar e Salvar Avaliação Agora",
             Font = new Font("Segoe UI", 12F, FontStyle.Bold),
-            Size = new Size(340, 48),
+            Size = new Size(360, 48),
             FlatStyle = FlatStyle.Flat,
             BackColor = BrandRed,
             ForeColor = Color.White,
@@ -349,7 +349,7 @@ public class MainForm : Form
         {
             var lblEmpty = new Label
             {
-                Text = "Nenhuma prova (.xlsx) encontrada na pasta Templates.\nClique em '📂 Pasta de Templates' abaixo para adicionar arquivos de prova.",
+                Text = "Nenhuma avaliação (.xlsx) encontrada na pasta Templates.\nAcesse o cadeado '🔒' abaixo para adicionar arquivos de avaliação na Pasta de Templates.",
                 Font = new Font("Segoe UI", 11F, FontStyle.Regular),
                 ForeColor = TextMuted,
                 AutoSize = false,
@@ -430,10 +430,10 @@ public class MainForm : Form
 
         var btnSelect = new Button
         {
-            Text = "Fazer Prova  ➔",
+            Text = "Fazer Avaliação  ➔",
             Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-            Size = new Size(148, 40),
-            Location = new Point(card.Width - 168, 19),
+            Size = new Size(164, 40),
+            Location = new Point(card.Width - 184, 19),
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
             FlatStyle = FlatStyle.Flat,
             BackColor = BrandRed,
@@ -485,8 +485,8 @@ public class MainForm : Form
         if (_currentSession != null)
         {
             MessageBox.Show(
-                "Já existe uma prova em andamento no Excel. Finalize a prova atual antes de iniciar outra.",
-                "Prova em Andamento",
+                "Já existe uma avaliação em andamento no Excel. Finalize a avaliação atual antes de iniciar outra.",
+                "Avaliação em Andamento",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
             return;
@@ -523,10 +523,10 @@ public class MainForm : Form
             _currentSession = session;
             session.StartSession();
 
-            // Atualiza tela para modo "Prova em Andamento"
+            // Atualiza tela para modo "Avaliação em Andamento"
             _lblActiveCandidate.Text = $"Candidato(a): {candidateName}";
-            _lblActiveExam.Text = $"Prova: {template.DisplayName}";
-            _lblActiveFile.Text = $"Arquivo em Provas Feitas: {Path.GetFileName(targetFilePath)}";
+            _lblActiveExam.Text = $"Avaliação: {template.DisplayName}";
+            _lblActiveFile.Text = $"Arquivo salvo: {Path.GetFileName(targetFilePath)}";
             _lblTimer.Text = "Tempo decorrido: 00:00:00";
 
             _selectionContainer.Visible = false;
@@ -539,8 +539,8 @@ public class MainForm : Form
             _currentSession = null;
 
             MessageBox.Show(
-                $"Não foi possível abrir a prova no Microsoft Excel:\n\n{ex.Message}",
-                "Erro ao Iniciar Prova",
+                $"Não foi possível abrir a avaliação no Microsoft Excel:\n\n{ex.Message}",
+                "Erro ao Iniciar Avaliação",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
@@ -580,12 +580,12 @@ public class MainForm : Form
 
         MessageBox.Show(
             this,
-            $"Prova finalizada e salva com sucesso!\n\n" +
+            $"Avaliação finalizada e salva com sucesso!\n\n" +
             $"👤 Candidato(a): {finishedSession.CandidateName}\n" +
-            $"📊 Prova: {finishedSession.ExamName}\n" +
+            $"📊 Avaliação: {finishedSession.ExamName}\n" +
             $"💾 Arquivo salvo: {Path.GetFileName(finishedSession.TargetFilePath)}\n" +
             $"📁 Pasta: {AppConfigAndStorage.CompletedExamsDirectory}",
-            "Prova Salva com Sucesso - Rainha",
+            "Avaliação Salva com Sucesso - Rainha",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
     }
@@ -612,8 +612,8 @@ public class MainForm : Form
         if (_currentSession != null)
         {
             var resp = MessageBox.Show(
-                "Existe uma prova aberta no Excel no momento.\nDeseja salvar automaticamente e fechar a prova antes de sair?",
-                "Prova em Andamento",
+                "Existe uma avaliação aberta no Excel no momento.\nDeseja salvar automaticamente e fechar a avaliação antes de sair?",
+                "Avaliação em Andamento",
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Question);
 
