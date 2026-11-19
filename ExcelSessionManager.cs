@@ -170,6 +170,9 @@ public class ExcelSessionManager : IDisposable
             UpdateLinks: 0,
             ReadOnly: false);
 
+        // Sempre posiciona na primeira aba visível da planilha e no topo (A1)
+        ActivateFirstVisibleWorksheet();
+
         // Maximiza e traz a janela do Excel para a frente
         try
         {
@@ -188,6 +191,68 @@ public class ExcelSessionManager : IDisposable
 
         // 5. Inicia monitoramento para detectar quando o candidato fechou o Excel
         _monitorTimer = new System.Threading.Timer(MonitorExcelCallback, null, 800, 800);
+    }
+
+    /// <summary>
+    /// Ativa a primeira aba visível da pasta de trabalho, rola a barra inferior de abas
+    /// para o início e seleciona a célula A1 no topo da planilha.
+    /// </summary>
+    private void ActivateFirstVisibleWorksheet()
+    {
+        if (_workbook == null || _excelApp == null)
+            return;
+
+        try
+        {
+            const int xlSheetVisible = -1;
+            const int xlFirst = 1;
+
+            int sheetCount = (int)_workbook.Worksheets.Count;
+            dynamic? firstVisibleSheet = null;
+
+            for (int i = 1; i <= sheetCount; i++)
+            {
+                dynamic ws = _workbook.Worksheets.Item(i);
+                try
+                {
+                    if ((int)ws.Visible == xlSheetVisible)
+                    {
+                        firstVisibleSheet = ws;
+                        break;
+                    }
+                }
+                catch
+                {
+                    firstVisibleSheet = ws;
+                    break;
+                }
+            }
+
+            if (firstVisibleSheet != null)
+            {
+                firstVisibleSheet.Activate();
+
+                try
+                {
+                    // Rola a barra inferior de abas totalmente para a esquerda (primeira aba)
+                    _excelApp.ActiveWindow.ScrollWorkbookTabs(Position: xlFirst);
+                }
+                catch { }
+
+                try
+                {
+                    // Posiciona a visualização no topo esquerdo da aba e seleciona A1
+                    _excelApp.ActiveWindow.ScrollRow = 1;
+                    _excelApp.ActiveWindow.ScrollColumn = 1;
+                    firstVisibleSheet.Range("A1").Select();
+                }
+                catch { }
+            }
+        }
+        catch
+        {
+            // Ignora caso a planilha esteja protegida contra seleção de células
+        }
     }
 
     private void AttachComEvents(object excelComObject)

@@ -85,6 +85,14 @@ respostas ao fechar o Excel.
        Data/Hora de Fim, Duração em Segundos e Status) nos arquivos de banco
        local "banco_provas.json" e "historico_provas.csv".
 
+[RN09] Abertura Obrigatória na Primeira Aba Visível:
+       Sempre que uma prova é iniciada, o sistema localiza automaticamente a
+       primeira aba visível da pasta de trabalho (Worksheets[1]), executa o
+       comando Activate(), rola a barra inferior de abas totalmente para a
+       esquerda (ScrollWorkbookTabs Position: xlFirst) e posiciona a tela no
+       topo esquerdo da planilha (célula A1), independentemente de qual aba
+       estava ativa quando o arquivo template foi salvo originalmente.
+
 
 4. ESTRUTURA DO BANCO DE DADOS E DIRETÓRIOS
 --------------------------------------------------------------------------------
