@@ -99,12 +99,22 @@ respostas ao fechar o Excel.
        topo esquerdo da planilha (célula A1), independentemente de qual aba
        estava ativa quando o arquivo template foi salvo originalmente.
 
+[RN10] Controle de Acesso por Senha nas Pastas (Ícone de Cadeado 🔒):
+       Os menus "Abrir Pasta de Provas Feitas" e "Pasta de Templates" ficam
+       protegidos dentro do botão com ícone de cadeado (🔒) no rodapé do
+       Launcher. Ao clicar no cadeado, o sistema exige a senha administrativa:
+       - Senha inicial padrão: 7272 (validada via hash SHA-256).
+       - Após o desbloqueio, o painel exibe os botões "📁 Abrir Pasta de Provas
+         Feitas", "📂 Pasta de Templates", além da seção para definir uma nova
+         senha ou resetar a senha de volta para o padrão inicial (7272).
+
 
 4. ESTRUTURA DO BANCO DE DADOS E DIRETÓRIOS
 --------------------------------------------------------------------------------
 4.1. Estrutura de Pastas (Padrão: C:\RainhaProvasExcel\ ou diretório local):
      ├── RainhaLauncherProvas.exe          (Executável principal autónomo)
      ├── Instalador_Rainha_Provas.exe      (Instalador de 1 clique autónomo)
+     ├── config_admin.json                 (Configuração criptografada da senha)
      ├── DOCUMENTACAO_SISTEMA.txt          (Documentação técnica e regras)
      ├── assets\
      │   ├── logo_rainha.png               (Logotipo oficial Rainha)
@@ -132,6 +142,15 @@ respostas ao fechar o Excel.
      | Status           | VARCHAR(30)  | Status final (ex.: CONCLUIDA_E_SALVA)         |
      +------------------+--------------+-----------------------------------------------+
 
+4.3. Estrutura da Configuração de Segurança (config_admin.json):
+     Entidade: AdminConfigData
+     +------------------+--------------+-----------------------------------------------+
+     | Campo            | Tipo         | Descrição                                     |
+     +------------------+--------------+-----------------------------------------------+
+     | PasswordHash     | CHAR(64)     | Hash SHA-256 da senha do cadeado (Padrão 7272)|
+     | UpdatedAt        | DATETIME     | Data e hora da última alteração/reset         |
+     +------------------+--------------+-----------------------------------------------+
+
 
 5. ARQUITETURA DO CÓDIGO-FONTE
 --------------------------------------------------------------------------------
@@ -142,12 +161,15 @@ respostas ao fechar o Excel.
                                 autoteste automatizado (--self-test).
 - AppConfigAndStorage.cs      : Gerenciamento de pastas, extração de templates,
                                 criação de atalho via WScript.Shell, sanitização
-                                de nomes e persistência no banco JSON/CSV.
+                                de nomes, persistência JSON/CSV e hash SHA-256
+                                da senha administrativa.
 - ExcelSessionManager.cs      : Automação COM do Microsoft Excel, conexão com
                                 IConnectionPoint (AppEvents) para interceptação
                                 do WorkbookBeforeClose e salvamento automático.
 - MainForm.cs                 : Interface principal com identidade visual Rainha,
                                 listagem dinâmica de provas e cronômetro ativo.
+- AdminLockDialog.cs          : Modal de autenticação por senha (cadeado 🔒) e
+                                painel restrito de pastas e reset de senha.
 - CandidateNameDialog.cs      : Modal de captura e validação do Nome Completo.
 - InstallerForm.cs            : Interface do Instalador Único de 1 clique.
 ================================================================================

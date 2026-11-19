@@ -22,12 +22,18 @@ public record ExamHistoryEntry(
     string Status
 );
 
+public record AdminConfigData(
+    string PasswordHash,
+    string UpdatedAt
+);
+
 public static class AppConfigAndStorage
 {
     public const string DefaultInstallDir = @"C:\RainhaProvasExcel";
     public const string ShortcutName = "Testes - Rainha.lnk";
     public const string LegacyShortcutName = "Provas de Excel - Rainha.lnk";
     public const string InstalledExeName = "RainhaLauncherProvas.exe";
+    public const string DefaultAdminPassword = "7272";
 
     public static string BaseDirectory
     {
@@ -54,6 +60,57 @@ public static class AppConfigAndStorage
     public static string CompletedExamsDirectory => Path.Combine(BaseDirectory, "Provas Feitas");
     public static string HistoryJsonPath => Path.Combine(CompletedExamsDirectory, "banco_provas.json");
     public static string HistoryCsvPath => Path.Combine(CompletedExamsDirectory, "historico_provas.csv");
+    public static string AdminConfigPath => Path.Combine(BaseDirectory, "config_admin.json");
+
+    public static bool VerifyAdminPassword(string inputPassword)
+    {
+        if (string.IsNullOrEmpty(inputPassword))
+            return false;
+
+        string expectedHash = GetCurrentAdminPasswordHash();
+        string inputHash = ComputeSha256(inputPassword.Trim());
+        return string.Equals(expectedHash, inputHash, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static void SetAdminPassword(string newPassword)
+    {
+        string hash = ComputeSha256(newPassword.Trim());
+        var data = new AdminConfigData(hash, DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+        var opts = new JsonSerializerOptions { WriteIndented = true };
+        File.WriteAllText(AdminConfigPath, JsonSerializer.Serialize(data, opts), Encoding.UTF8);
+    }
+
+    public static void ResetAdminPasswordToDefault()
+    {
+        SetAdminPassword(DefaultAdminPassword);
+    }
+
+    private static string GetCurrentAdminPasswordHash()
+    {
+        try
+        {
+            if (File.Exists(AdminConfigPath))
+            {
+                string json = File.ReadAllText(AdminConfigPath, Encoding.UTF8);
+                var data = JsonSerializer.Deserialize<AdminConfigData>(json);
+                if (data != null && !string.IsNullOrWhiteSpace(data.PasswordHash))
+                {
+                    return data.PasswordHash;
+                }
+            }
+        }
+        catch
+        {
+        }
+
+        return ComputeSha256(DefaultAdminPassword);
+    }
+
+    private static string ComputeSha256(string raw)
+    {
+        byte[] bytes = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(raw));
+        return Convert.ToHexString(bytes);
+    }
 
     /// <summary>
     /// Garante que a estrutura de pastas (Templates e Provas Feitas) e os arquivos básicos existam.

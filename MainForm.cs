@@ -112,7 +112,7 @@ public class MainForm : Form
         };
         headerPanel.Controls.Add(stripePanel);
 
-        // 2. Rodapé com atalhos para RH / Avaliador
+        // 2. Rodapé com ícone de Cadeado (Acesso Restrito por Senha) e ações básicas
         var footerPanel = new Panel
         {
             Dock = DockStyle.Bottom,
@@ -121,17 +121,27 @@ public class MainForm : Form
             Padding = new Padding(20, 10, 20, 10)
         };
 
-        var btnOpenCompleted = CreateFooterButton("📁 Abrir Pasta de Provas Feitas", BrandRed, Color.White);
-        btnOpenCompleted.Location = new Point(24, 11);
-        btnOpenCompleted.Size = new Size(225, 34);
-        btnOpenCompleted.Click += (s, e) => OpenFolderInExplorer(AppConfigAndStorage.CompletedExamsDirectory);
-        footerPanel.Controls.Add(btnOpenCompleted);
-
-        var btnOpenTemplates = CreateFooterButton("📂 Pasta de Templates", Color.White, TextDark);
-        btnOpenTemplates.Location = new Point(260, 11);
-        btnOpenTemplates.Size = new Size(175, 34);
-        btnOpenTemplates.Click += (s, e) => OpenFolderInExplorer(AppConfigAndStorage.TemplatesDirectory);
-        footerPanel.Controls.Add(btnOpenTemplates);
+        var btnAdminLock = new Button
+        {
+            Text = "🔒",
+            Font = new Font("Segoe UI Emoji", 13F, FontStyle.Regular),
+            Location = new Point(24, 10),
+            Size = new Size(46, 36),
+            FlatStyle = FlatStyle.Flat,
+            BackColor = BrandRed,
+            ForeColor = Color.White,
+            Cursor = Cursors.Hand
+        };
+        btnAdminLock.FlatAppearance.BorderSize = 0;
+        var toolTip = new ToolTip();
+        toolTip.SetToolTip(btnAdminLock, "Acesso Restrito (Provas Feitas, Pasta de Templates e Senha)");
+        btnAdminLock.Click += (s, e) =>
+        {
+            using var lockDlg = new AdminLockDialog();
+            lockDlg.ShowDialog(this);
+            LoadExamTemplates();
+        };
+        footerPanel.Controls.Add(btnAdminLock);
 
         var btnRefresh = CreateFooterButton("🔄 Atualizar Lista", Color.White, TextDark);
         btnRefresh.Location = new Point(445, 11);
