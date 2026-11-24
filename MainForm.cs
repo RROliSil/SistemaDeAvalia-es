@@ -341,10 +341,8 @@ public class MainForm : Form
         Controls.Add(_activeSessionPanel);
         Controls.Add(_selectionContainer);
         Controls.Add(_footerPanel);
-        Controls.Add(_titleBar);
         Controls.Add(_headerPanel);
-        Controls.SetChildIndex(_headerPanel, 0);
-        Controls.SetChildIndex(_titleBar, 1);
+        Controls.Add(_titleBar);
 
         _uiTimer = new System.Windows.Forms.Timer { Interval = 1000 };
         _uiTimer.Tick += UiTimer_Tick;
@@ -455,11 +453,11 @@ public class MainForm : Form
 
     private Panel CreateExamCard(ExamTemplateItem item)
     {
-        int cardWidth = Math.Max(640, _examsListPanel.ClientSize.Width - 28);
+        int cardWidth = Math.Max(200, _examsListPanel.ClientSize.Width - 10);
         var card = new Panel
         {
             Size = new Size(cardWidth, 78),
-            Margin = new Padding(4, 6, 4, 6),
+            Margin = new Padding(2, 6, 2, 6),
             BackColor = _theme.CardBg,
             Cursor = Cursors.Hand
         };
@@ -553,7 +551,7 @@ public class MainForm : Form
 
     private void ResizeExamCards()
     {
-        int targetWidth = Math.Max(620, _examsListPanel.ClientSize.Width - 26);
+        int targetWidth = Math.Max(200, _examsListPanel.ClientSize.Width - 10);
         foreach (Control ctrl in _examsListPanel.Controls)
         {
             if (ctrl is Panel card)
