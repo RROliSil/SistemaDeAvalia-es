@@ -167,6 +167,38 @@ public static class AppConfigAndStorage
 
     public static ThemePalette GetActiveTheme() => IsDarkModeEnabled() ? ThemePalette.Dark : ThemePalette.Light;
 
+    [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+    /// <summary>
+    /// Aplica o tema escuro ou claro na barra de título nativa do Windows (Windows 10/11).
+    /// </summary>
+    public static void ApplyWindowTitleBarTheme(IntPtr hwnd, bool isDark)
+    {
+        if (hwnd == IntPtr.Zero)
+            return;
+
+        try
+        {
+            const int DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 = 19;
+            const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+            const int DWMWA_CAPTION_COLOR = 35;
+
+            int darkValue = isDark ? 1 : 0;
+            if (DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref darkValue, sizeof(int)) != 0)
+            {
+                DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1, ref darkValue, sizeof(int));
+            }
+
+            // No Windows 11 22H2+, colore exatamente a barra de título para combinar com o cabeçalho (#231E1C -> BGR 0x001C1E23)
+            int captionColor = isDark ? 0x001C1E23 : unchecked((int)0xFFFFFFFF);
+            DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ref captionColor, sizeof(int));
+        }
+        catch
+        {
+        }
+    }
+
     public static bool VerifyAdminPassword(string inputPassword)
     {
         if (string.IsNullOrEmpty(inputPassword))

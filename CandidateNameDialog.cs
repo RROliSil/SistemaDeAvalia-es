@@ -137,6 +137,7 @@ public class CandidateNameDialog : Form
 
         AcceptButton = btnConfirm;
         CancelButton = btnCancel;
+        HandleCreated += (s, e) => AppConfigAndStorage.ApplyWindowTitleBarTheme(Handle, theme.IsDark);
         Shown += (s, e) => _txtFullName.Focus();
     }
 

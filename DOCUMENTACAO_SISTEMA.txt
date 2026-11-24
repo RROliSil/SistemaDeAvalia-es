@@ -111,9 +111,9 @@ respostas ao fechar o Excel.
 [RN11] Modo Noturno (Dark Mode) Persistente:
        O rodapé do Launcher possui o botão "🌙 Modo Noturno / ☀️ Modo Claro"
        que alterna dinamicamente entre o tema claro e o tema escuro em toda a
-       interface (Launcher, cartões de avaliação, painel de execução e modais),
-       preservando a paleta da marca Rainha e salvando a preferência no arquivo
-       "config_theme.json".
+       interface (barra de título nativa do Windows via dwmapi.dll, Launcher,
+       cartões de avaliação, painel de execução e modais), preservando a paleta
+       da marca Rainha e salvando a preferência no arquivo "config_theme.json".
 
 
 4. ESTRUTURA DO BANCO DE DADOS E DIRETÓRIOS

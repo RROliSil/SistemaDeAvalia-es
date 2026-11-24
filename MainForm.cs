@@ -334,6 +334,7 @@ public class MainForm : Form
 
         ApplyTheme();
 
+        HandleCreated += (s, e) => AppConfigAndStorage.ApplyWindowTitleBarTheme(Handle, _theme.IsDark);
         Load += (s, e) => LoadExamTemplates();
         FormClosing += MainForm_FormClosing;
     }
@@ -349,6 +350,10 @@ public class MainForm : Form
 
     private void ApplyTheme()
     {
+        if (IsHandleCreated)
+        {
+            AppConfigAndStorage.ApplyWindowTitleBarTheme(Handle, _theme.IsDark);
+        }
         BackColor = _theme.WindowBg;
         _headerPanel.BackColor = _theme.HeaderBg;
         _lblHeaderTitle.ForeColor = _theme.BrandRed;

@@ -286,6 +286,7 @@ public class AdminLockDialog : Form
 
         AcceptButton = _btnUnlock;
         CancelButton = btnCancel;
+        HandleCreated += (s, e) => AppConfigAndStorage.ApplyWindowTitleBarTheme(Handle, _theme.IsDark);
         Shown += (s, e) => _txtPassword.Focus();
     }
 
