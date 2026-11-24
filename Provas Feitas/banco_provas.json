@@ -1,0 +1,12 @@
+﻿[
+  {
+    "Id": "CF724896",
+    "NomeCandidato": "aaaaa",
+    "ProvaRealizada": "TESTE EXCEL - APRENDIZ ",
+    "ArquivoSalvo": "aaaaa.xlsx",
+    "DataHoraInicio": "24/11/2026 14:47:56",
+    "DataHoraFim": "24/11/2026 14:48:00",
+    "DuracaoSegundos": 4,
+    "Status": "CONCLUIDA_E_SALVA"
+  }
+]

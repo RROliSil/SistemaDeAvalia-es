@@ -147,23 +147,17 @@ public class MainForm : Form
         _footerPanel.Controls.Add(_btnAdminLock);
 
         _btnThemeToggle = CreateFooterButton("🌙 Modo Noturno", _theme.SecondaryBtnBg, _theme.TextPrimary);
-        _btnThemeToggle.Location = new Point(285, 11);
         _btnThemeToggle.Size = new Size(150, 34);
-        _btnThemeToggle.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         _btnThemeToggle.Click += (s, e) => ToggleTheme();
         _footerPanel.Controls.Add(_btnThemeToggle);
 
         _btnRefresh = CreateFooterButton("🔄 Atualizar Lista", _theme.SecondaryBtnBg, _theme.TextPrimary);
-        _btnRefresh.Location = new Point(445, 11);
         _btnRefresh.Size = new Size(140, 34);
-        _btnRefresh.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         _btnRefresh.Click += (s, e) => LoadExamTemplates();
         _footerPanel.Controls.Add(_btnRefresh);
 
         _btnShortcut = CreateFooterButton("📌 Atalho Desktop", _theme.SecondaryBtnBg, _theme.BrandOrange);
-        _btnShortcut.Location = new Point(595, 11);
         _btnShortcut.Size = new Size(130, 34);
-        _btnShortcut.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         _btnShortcut.Click += (s, e) =>
         {
             string exePath = Environment.ProcessPath ?? Path.Combine(AppConfigAndStorage.BaseDirectory, AppConfigAndStorage.InstalledExeName);
@@ -175,6 +169,24 @@ public class MainForm : Form
                 MessageBoxIcon.Information);
         };
         _footerPanel.Controls.Add(_btnShortcut);
+
+        void LayoutFooterButtons()
+        {
+            int rightMargin = 20;
+            int gap = 10;
+            int x = _footerPanel.ClientSize.Width - rightMargin;
+
+            x -= _btnShortcut.Width;
+            _btnShortcut.Location = new Point(x, 11);
+
+            x -= gap + _btnRefresh.Width;
+            _btnRefresh.Location = new Point(x, 11);
+
+            x -= gap + _btnThemeToggle.Width;
+            _btnThemeToggle.Location = new Point(x, 11);
+        }
+        _footerPanel.SizeChanged += (s, e) => LayoutFooterButtons();
+        LayoutFooterButtons();
 
         // 3. Container Principal de Seleção de Avaliações
         _selectionContainer = new Panel
