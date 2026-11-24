@@ -12,6 +12,7 @@ public class MainForm : Form
 {
     private ThemePalette _theme;
 
+    private readonly ThemedTitleBar _titleBar;
     private readonly Panel _headerPanel;
     private readonly Label _lblHeaderTitle;
     private readonly Label _lblHeaderSubtitle;
@@ -46,12 +47,25 @@ public class MainForm : Form
         Text = "Rainha - Central de Avaliações de Excel";
         Size = new Size(760, 620);
         MinimumSize = new Size(720, 580);
+        FormBorderStyle = FormBorderStyle.None;
+        Padding = new Padding(1);
         StartPosition = FormStartPosition.CenterScreen;
         DoubleBuffered = true;
 
         Icon? appIcon = AppConfigAndStorage.LoadEmbeddedIcon();
         if (appIcon != null)
             Icon = appIcon;
+
+        _titleBar = new ThemedTitleBar(this, _theme, showMaximize: true, showMinimize: true);
+
+        Paint += (s, e) =>
+        {
+            if (WindowState != FormWindowState.Maximized)
+            {
+                using var borderPen = new Pen(_theme.CardBorder, 1);
+                e.Graphics.DrawRectangle(borderPen, 0, 0, Width - 1, Height - 1);
+            }
+        };
 
         // 1. Cabeçalho Superior com Logo Rainha
         _headerPanel = new Panel
@@ -327,14 +341,16 @@ public class MainForm : Form
         Controls.Add(_activeSessionPanel);
         Controls.Add(_selectionContainer);
         Controls.Add(_footerPanel);
+        Controls.Add(_titleBar);
         Controls.Add(_headerPanel);
+        Controls.SetChildIndex(_headerPanel, 0);
+        Controls.SetChildIndex(_titleBar, 1);
 
         _uiTimer = new System.Windows.Forms.Timer { Interval = 1000 };
         _uiTimer.Tick += UiTimer_Tick;
 
         ApplyTheme();
 
-        HandleCreated += (s, e) => AppConfigAndStorage.ApplyWindowTitleBarTheme(Handle, _theme.IsDark);
         Load += (s, e) => LoadExamTemplates();
         FormClosing += MainForm_FormClosing;
     }
@@ -350,10 +366,7 @@ public class MainForm : Form
 
     private void ApplyTheme()
     {
-        if (IsHandleCreated)
-        {
-            AppConfigAndStorage.ApplyWindowTitleBarTheme(Handle, _theme.IsDark);
-        }
+        _titleBar.ApplyTheme(_theme);
         BackColor = _theme.WindowBg;
         _headerPanel.BackColor = _theme.HeaderBg;
         _lblHeaderTitle.ForeColor = _theme.BrandRed;

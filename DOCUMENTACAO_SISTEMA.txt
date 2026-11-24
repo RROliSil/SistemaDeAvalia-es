@@ -188,6 +188,9 @@ respostas ao fechar o Excel.
 - AdminLockDialog.cs          : Modal de autenticação por senha (cadeado 🔒) e
                                 painel restrito de pastas e reset de senha.
 - CandidateNameDialog.cs      : Modal de captura e validação do Nome Completo.
+- ThemedTitleBar.cs           : Barra de título própria responsiva ao tema
+                                (Claro/Noturno) para compatibilidade visual em
+                                Windows 10 IoT, Windows 10 e Windows 11.
 - ThemedMessageDialog.cs      : Diálogo pop-up temático (Modo Claro / Noturno)
                                 substituindo o MessageBox padrão do Windows.
 - InstallerForm.cs            : Interface do Instalador Único de 1 clique.

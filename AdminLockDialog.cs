@@ -25,8 +25,9 @@ public class AdminLockDialog : Form
         _theme = AppConfigAndStorage.GetActiveTheme();
 
         Text = "🔒 Acesso Restrito - Rainha";
-        Size = new Size(480, 300);
-        FormBorderStyle = FormBorderStyle.FixedDialog;
+        Size = new Size(480, 310);
+        FormBorderStyle = FormBorderStyle.None;
+        Padding = new Padding(1);
         StartPosition = FormStartPosition.CenterParent;
         MaximizeBox = false;
         MinimizeBox = false;
@@ -36,11 +37,19 @@ public class AdminLockDialog : Form
         if (appIcon != null)
             Icon = appIcon;
 
+        Paint += (s, e) =>
+        {
+            using var borderPen = new Pen(_theme.CardBorder, 1);
+            e.Graphics.DrawRectangle(borderPen, 0, 0, Width - 1, Height - 1);
+        };
+
+        var titleBar = new ThemedTitleBar(this, _theme, showMaximize: false, showMinimize: false);
+
         // Barra superior tricolor Rainha
         var topBanner = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 8
+            Height = 6
         };
         topBanner.Paint += (s, e) =>
         {
@@ -52,6 +61,7 @@ public class AdminLockDialog : Form
             e.Graphics.FillRectangle(brush, topBanner.ClientRectangle);
         };
         Controls.Add(topBanner);
+        Controls.Add(titleBar);
 
         // =====================================================================
         // ETAPA 1: PAINEL DE SENHA (CADEADO FECHADO)
@@ -283,10 +293,11 @@ public class AdminLockDialog : Form
 
         Controls.Add(_adminPanel);
         Controls.Add(_loginPanel);
+        Controls.SetChildIndex(_adminPanel, 0);
+        Controls.SetChildIndex(_loginPanel, 0);
 
         AcceptButton = _btnUnlock;
         CancelButton = btnCancel;
-        HandleCreated += (s, e) => AppConfigAndStorage.ApplyWindowTitleBarTheme(Handle, _theme.IsDark);
         Shown += (s, e) => _txtPassword.Focus();
     }
 
@@ -303,7 +314,7 @@ public class AdminLockDialog : Form
 
         // Desbloqueia e expande para o painel administrativo
         _loginPanel.Visible = false;
-        Size = new Size(480, 390);
+        Size = new Size(480, 415);
         Text = "🔓 Painel Administrativo - Rainha";
         _adminPanel.Visible = true;
         AcceptButton = null;

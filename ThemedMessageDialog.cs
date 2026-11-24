@@ -12,7 +12,8 @@ public sealed class ThemedMessageDialog : Form
         ThemePalette theme = AppConfigAndStorage.GetActiveTheme();
 
         Text = title;
-        FormBorderStyle = FormBorderStyle.FixedDialog;
+        FormBorderStyle = FormBorderStyle.None;
+        Padding = new Padding(1);
         StartPosition = FormStartPosition.CenterParent;
         MaximizeBox = false;
         MinimizeBox = false;
@@ -23,6 +24,14 @@ public sealed class ThemedMessageDialog : Form
         Icon? appIcon = AppConfigAndStorage.LoadEmbeddedIcon();
         if (appIcon != null)
             Icon = appIcon;
+
+        Paint += (s, e) =>
+        {
+            using var borderPen = new Pen(theme.CardBorder, 1);
+            e.Graphics.DrawRectangle(borderPen, 0, 0, Width - 1, Height - 1);
+        };
+
+        var titleBar = new ThemedTitleBar(this, theme, showMaximize: false, showMinimize: false);
 
         var topBanner = new Panel
         {
@@ -44,7 +53,12 @@ public sealed class ThemedMessageDialog : Form
             brush.InterpolationColors = blend;
             e.Graphics.FillRectangle(brush, topBanner.ClientRectangle);
         };
-        Controls.Add(topBanner);
+
+        var contentPanel = new Panel
+        {
+            Dock = DockStyle.Fill,
+            BackColor = theme.WindowBg
+        };
 
         string badgeSymbol = icon switch
         {
@@ -64,7 +78,7 @@ public sealed class ThemedMessageDialog : Form
 
         var picBadge = new Panel
         {
-            Location = new Point(24, 28),
+            Location = new Point(24, 24),
             Size = new Size(42, 42),
             BackColor = Color.Transparent
         };
@@ -77,7 +91,7 @@ public sealed class ThemedMessageDialog : Form
             using var font = new Font("Segoe UI", 16F, FontStyle.Bold);
             e.Graphics.DrawString(badgeSymbol, font, Brushes.White, new RectangleF(1, 1, 39, 39), sf);
         };
-        Controls.Add(picBadge);
+        contentPanel.Controls.Add(picBadge);
 
         int textWidth = 370;
         var textFont = new Font("Segoe UI", 10F, FontStyle.Regular);
@@ -93,26 +107,28 @@ public sealed class ThemedMessageDialog : Form
             Text = message,
             Font = textFont,
             ForeColor = theme.TextPrimary,
-            Location = new Point(80, 26),
+            Location = new Point(80, 22),
             Size = new Size(textWidth, textHeight),
             BackColor = Color.Transparent
         };
-        Controls.Add(lblMessage);
+        contentPanel.Controls.Add(lblMessage);
 
-        int footerTop = Math.Max(92, lblMessage.Bottom + 20);
+        int footerTop = Math.Max(88, lblMessage.Bottom + 20);
         var footerPanel = new Panel
         {
-            Location = new Point(0, footerTop),
-            Size = new Size(ClientSize.Width, 62),
-            BackColor = theme.FooterBg,
-            Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom
+            Dock = DockStyle.Bottom,
+            Height = 62,
+            BackColor = theme.FooterBg
         };
 
         AddButtons(footerPanel, buttons, theme);
-        Controls.Add(footerPanel);
 
-        ClientSize = new Size(464, footerTop + 62);
-        HandleCreated += (s, e) => AppConfigAndStorage.ApplyWindowTitleBarTheme(Handle, theme.IsDark);
+        Controls.Add(contentPanel);
+        Controls.Add(footerPanel);
+        Controls.Add(topBanner);
+        Controls.Add(titleBar);
+
+        ClientSize = new Size(466, 34 + 6 + footerTop + 62 + 2);
     }
 
     private void AddButtons(Panel footerPanel, MessageBoxButtons buttons, ThemePalette theme)
