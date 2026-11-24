@@ -7,12 +7,6 @@ namespace RainhaLauncherProvas;
 
 public class CandidateNameDialog : Form
 {
-    private static readonly Color BrandRed = Color.FromArgb(223, 70, 42);      // #DF462A
-    private static readonly Color BrandOrange = Color.FromArgb(241, 128, 36);  // #F18024
-    private static readonly Color BrandYellow = Color.FromArgb(252, 195, 43);  // #FCC32B
-    private static readonly Color WarmBg = Color.FromArgb(255, 249, 245);      // #FFF9F5
-    private static readonly Color TextDark = Color.FromArgb(45, 37, 34);
-
     private readonly TextBox _txtFullName;
     private readonly Label _lblError;
 
@@ -20,13 +14,15 @@ public class CandidateNameDialog : Form
 
     public CandidateNameDialog(string selectedExamName)
     {
+        ThemePalette theme = AppConfigAndStorage.GetActiveTheme();
+
         Text = "Identificação do Candidato - Rainha";
         Size = new Size(500, 330);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         StartPosition = FormStartPosition.CenterParent;
         MaximizeBox = false;
         MinimizeBox = false;
-        BackColor = WarmBg;
+        BackColor = theme.WindowBg;
 
         Icon? appIcon = AppConfigAndStorage.LoadEmbeddedIcon();
         if (appIcon != null)
@@ -42,8 +38,8 @@ public class CandidateNameDialog : Form
         {
             using var brush = new LinearGradientBrush(
                 topBanner.ClientRectangle,
-                BrandRed,
-                BrandYellow,
+                theme.BrandRed,
+                theme.BrandYellow,
                 LinearGradientMode.Horizontal);
             e.Graphics.FillRectangle(brush, topBanner.ClientRectangle);
         };
@@ -53,7 +49,7 @@ public class CandidateNameDialog : Form
         {
             Text = "Identificação para Início da Avaliação",
             Font = new Font("Segoe UI", 14F, FontStyle.Bold),
-            ForeColor = BrandRed,
+            ForeColor = theme.BrandRed,
             AutoSize = false,
             Location = new Point(28, 24),
             Size = new Size(430, 30)
@@ -64,7 +60,7 @@ public class CandidateNameDialog : Form
         {
             Text = $"Avaliação selecionada: {selectedExamName}",
             Font = new Font("Segoe UI Semibold", 10.5F, FontStyle.Bold),
-            ForeColor = BrandOrange,
+            ForeColor = theme.BrandOrange,
             AutoSize = false,
             Location = new Point(28, 56),
             Size = new Size(430, 26)
@@ -75,7 +71,7 @@ public class CandidateNameDialog : Form
         {
             Text = "Digite seu NOME COMPLETO abaixo:\n(Seu nome será usado para salvar sua avaliação automaticamente)",
             Font = new Font("Segoe UI", 9.75F, FontStyle.Regular),
-            ForeColor = TextDark,
+            ForeColor = theme.TextPrimary,
             AutoSize = false,
             Location = new Point(28, 92),
             Size = new Size(430, 42)
@@ -88,6 +84,8 @@ public class CandidateNameDialog : Form
             Location = new Point(28, 140),
             Size = new Size(428, 34),
             MaxLength = 120,
+            BackColor = theme.InputBg,
+            ForeColor = theme.TextPrimary,
             PlaceholderText = "Ex: Maria Aparecida da Silva"
         };
         Controls.Add(_txtFullName);
@@ -96,7 +94,7 @@ public class CandidateNameDialog : Form
         {
             Text = "",
             Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(200, 30, 30),
+            ForeColor = theme.ErrorText,
             AutoSize = false,
             Location = new Point(28, 178),
             Size = new Size(428, 22)
@@ -110,11 +108,11 @@ public class CandidateNameDialog : Form
             Location = new Point(192, 218),
             Size = new Size(110, 42),
             FlatStyle = FlatStyle.Flat,
-            BackColor = Color.White,
-            ForeColor = TextDark,
+            BackColor = theme.SecondaryBtnBg,
+            ForeColor = theme.TextPrimary,
             Cursor = Cursors.Hand
         };
-        btnCancel.FlatAppearance.BorderColor = Color.FromArgb(210, 195, 188);
+        btnCancel.FlatAppearance.BorderColor = theme.SecondaryBtnBorder;
         btnCancel.Click += (s, e) =>
         {
             DialogResult = DialogResult.Cancel;
@@ -129,7 +127,7 @@ public class CandidateNameDialog : Form
             Location = new Point(312, 218),
             Size = new Size(144, 42),
             FlatStyle = FlatStyle.Flat,
-            BackColor = BrandRed,
+            BackColor = theme.BrandRed,
             ForeColor = Color.White,
             Cursor = Cursors.Hand
         };

@@ -16,8 +16,8 @@
   <ItemGroup>
     <EmbeddedResource Include="assets\logo_rainha.png" LogicalName="Rainha.logo_rainha.png" />
     <EmbeddedResource Include="assets\rainha.ico" LogicalName="Rainha.rainha.ico" />
-    <EmbeddedResource Include="Templates\Prova de Excel para Aprendiz.xlsx" LogicalName="Rainha.Template.Prova de Excel para Aprendiz.xlsx" />
-    <EmbeddedResource Include="Templates\Prova de Excel Avançado.xlsx" LogicalName="Rainha.Template.Prova de Excel Avançado.xlsx" />
+    <EmbeddedResource Include="Templates\TESTE EXCEL - APRENDIZ .xlsx" LogicalName="Rainha.Template.TESTE EXCEL - APRENDIZ .xlsx" />
+    <EmbeddedResource Include="Templates\TESTE EXCEL- AUX ADMINISTRATIVO.xlsx" LogicalName="Rainha.Template.TESTE EXCEL- AUX ADMINISTRATIVO.xlsx" />
   </ItemGroup>
 
 </Project>

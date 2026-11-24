@@ -27,6 +27,72 @@ public record AdminConfigData(
     string UpdatedAt
 );
 
+public record ThemeConfigData(
+    bool DarkMode,
+    string UpdatedAt
+);
+
+public record ThemePalette(
+    bool IsDark,
+    Color BrandRed,
+    Color BrandOrange,
+    Color BrandYellow,
+    Color WindowBg,
+    Color HeaderBg,
+    Color FooterBg,
+    Color CardBg,
+    Color CardHoverBg,
+    Color CardBorder,
+    Color InputBg,
+    Color SecondaryBtnBg,
+    Color SecondaryBtnBorder,
+    Color TextPrimary,
+    Color TextMuted,
+    Color ErrorText,
+    Color SuccessText
+)
+{
+    public static readonly ThemePalette Light = new(
+        IsDark: false,
+        BrandRed: Color.FromArgb(223, 70, 42),
+        BrandOrange: Color.FromArgb(241, 128, 36),
+        BrandYellow: Color.FromArgb(252, 195, 43),
+        WindowBg: Color.FromArgb(255, 249, 245),
+        HeaderBg: Color.White,
+        FooterBg: Color.FromArgb(248, 238, 232),
+        CardBg: Color.White,
+        CardHoverBg: Color.FromArgb(255, 242, 234),
+        CardBorder: Color.FromArgb(240, 215, 205),
+        InputBg: Color.White,
+        SecondaryBtnBg: Color.White,
+        SecondaryBtnBorder: Color.FromArgb(215, 195, 185),
+        TextPrimary: Color.FromArgb(45, 37, 34),
+        TextMuted: Color.FromArgb(120, 105, 98),
+        ErrorText: Color.FromArgb(200, 30, 30),
+        SuccessText: Color.FromArgb(25, 135, 60)
+    );
+
+    public static readonly ThemePalette Dark = new(
+        IsDark: true,
+        BrandRed: Color.FromArgb(232, 84, 56),
+        BrandOrange: Color.FromArgb(246, 142, 54),
+        BrandYellow: Color.FromArgb(252, 195, 43),
+        WindowBg: Color.FromArgb(26, 22, 21),
+        HeaderBg: Color.FromArgb(35, 30, 28),
+        FooterBg: Color.FromArgb(32, 27, 25),
+        CardBg: Color.FromArgb(42, 36, 34),
+        CardHoverBg: Color.FromArgb(56, 46, 42),
+        CardBorder: Color.FromArgb(74, 60, 54),
+        InputBg: Color.FromArgb(50, 43, 40),
+        SecondaryBtnBg: Color.FromArgb(48, 41, 38),
+        SecondaryBtnBorder: Color.FromArgb(88, 72, 65),
+        TextPrimary: Color.FromArgb(245, 238, 234),
+        TextMuted: Color.FromArgb(182, 168, 160),
+        ErrorText: Color.FromArgb(255, 110, 110),
+        SuccessText: Color.FromArgb(95, 210, 135)
+    );
+}
+
 public static class AppConfigAndStorage
 {
     public const string DefaultInstallDir = @"C:\RainhaProvasExcel";
@@ -65,6 +131,41 @@ public static class AppConfigAndStorage
     public static string HistoryJsonPath => Path.Combine(CompletedExamsDirectory, "banco_provas.json");
     public static string HistoryCsvPath => Path.Combine(CompletedExamsDirectory, "historico_provas.csv");
     public static string AdminConfigPath => Path.Combine(BaseDirectory, "config_admin.json");
+    public static string ThemeConfigPath => Path.Combine(BaseDirectory, "config_theme.json");
+
+    public static bool IsDarkModeEnabled()
+    {
+        try
+        {
+            if (File.Exists(ThemeConfigPath))
+            {
+                string json = File.ReadAllText(ThemeConfigPath, Encoding.UTF8);
+                var data = JsonSerializer.Deserialize<ThemeConfigData>(json);
+                if (data != null)
+                    return data.DarkMode;
+            }
+        }
+        catch
+        {
+        }
+        return false;
+    }
+
+    public static void SetDarkModeEnabled(bool enabled)
+    {
+        try
+        {
+            Directory.CreateDirectory(BaseDirectory);
+            var data = new ThemeConfigData(enabled, DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+            var opts = new JsonSerializerOptions { WriteIndented = true };
+            File.WriteAllText(ThemeConfigPath, JsonSerializer.Serialize(data, opts), Encoding.UTF8);
+        }
+        catch
+        {
+        }
+    }
+
+    public static ThemePalette GetActiveTheme() => IsDarkModeEnabled() ? ThemePalette.Dark : ThemePalette.Light;
 
     public static bool VerifyAdminPassword(string inputPassword)
     {
@@ -142,11 +243,11 @@ public static class AppConfigAndStorage
 
         if (existingTemplates.Count == 0)
         {
-            string tpl1 = Path.Combine(tplDir, "Prova de Excel para Aprendiz.xlsx");
-            string tpl2 = Path.Combine(tplDir, "Prova de Excel Avançado.xlsx");
+            string tpl1 = Path.Combine(tplDir, "TESTE EXCEL - APRENDIZ .xlsx");
+            string tpl2 = Path.Combine(tplDir, "TESTE EXCEL- AUX ADMINISTRATIVO.xlsx");
 
-            ExtractResourceIfMissing("Rainha.Template.Prova de Excel para Aprendiz.xlsx", tpl1);
-            ExtractResourceIfMissing("Rainha.Template.Prova de Excel Avançado.xlsx", tpl2);
+            ExtractResourceIfMissing("Rainha.Template.TESTE EXCEL - APRENDIZ .xlsx", tpl1);
+            ExtractResourceIfMissing("Rainha.Template.TESTE EXCEL- AUX ADMINISTRATIVO.xlsx", tpl2);
         }
 
         // Marca todos os templates como Somente Leitura para garantir integridade total

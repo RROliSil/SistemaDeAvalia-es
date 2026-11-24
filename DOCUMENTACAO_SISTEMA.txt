@@ -1,7 +1,7 @@
 ================================================================================
 DOCUMENTAÇÃO DO SISTEMA - RAINHA: CENTRAL DE AVALIAÇÕES DE EXCEL
-Última Atualização: 19/11/2026
-Versão: 1.1.0
+Última Atualização: 24/11/2026
+Versão: 1.2.0
 ================================================================================
 
 1. VISÃO GERAL DO SISTEMA
@@ -108,6 +108,13 @@ respostas ao fechar o Excel.
          Avaliações Feitas", "📂 Pasta de Templates", além da seção para definir
          uma nova senha ou resetar a senha de volta para o padrão inicial (7272).
 
+[RN11] Modo Noturno (Dark Mode) Persistente:
+       O rodapé do Launcher possui o botão "🌙 Modo Noturno / ☀️ Modo Claro"
+       que alterna dinamicamente entre o tema claro e o tema escuro em toda a
+       interface (Launcher, cartões de avaliação, painel de execução e modais),
+       preservando a paleta da marca Rainha e salvando a preferência no arquivo
+       "config_theme.json".
+
 
 4. ESTRUTURA DO BANCO DE DADOS E DIRETÓRIOS
 --------------------------------------------------------------------------------
@@ -115,13 +122,14 @@ respostas ao fechar o Excel.
      ├── RainhaLauncherProvas.exe          (Executável principal autónomo)
      ├── Instalador_Rainha_Provas.exe      (Instalador de 1 clique autónomo)
      ├── config_admin.json                 (Configuração criptografada da senha)
+     ├── config_theme.json                 (Preferência de tema Claro/Escuro)
      ├── DOCUMENTACAO_SISTEMA.txt          (Documentação técnica e regras)
      ├── assets\
      │   ├── logo_rainha.png               (Logotipo oficial Rainha)
      │   └── rainha.ico                    (Ícone oficial do executável e atalho)
      ├── Templates\                        (Modelos originais protegidos - ReadOnly)
-     │   ├── Prova de Excel para Aprendiz.xlsx
-     │   └── Prova de Excel Avançado.xlsx
+     │   ├── TESTE EXCEL - APRENDIZ .xlsx
+     │   └── TESTE EXCEL- AUX ADMINISTRATIVO.xlsx
      └── Provas Feitas\                    (Provas concluídas pelos candidatos)
          ├── <Nome Completo do Candidato>.xlsx
          ├── banco_provas.json             (Banco de dados estruturado JSON)
@@ -149,6 +157,15 @@ respostas ao fechar o Excel.
      +------------------+--------------+-----------------------------------------------+
      | PasswordHash     | CHAR(64)     | Hash SHA-256 da senha do cadeado (Padrão 7272)|
      | UpdatedAt        | DATETIME     | Data e hora da última alteração/reset         |
+     +------------------+--------------+-----------------------------------------------+
+
+4.4. Estrutura da Configuração de Tema (config_theme.json):
+     Entidade: ThemeConfigData
+     +------------------+--------------+-----------------------------------------------+
+     | Campo            | Tipo         | Descrição                                     |
+     +------------------+--------------+-----------------------------------------------+
+     | DarkMode         | BOOLEAN      | true = Modo Noturno ativo; false = Modo Claro |
+     | UpdatedAt        | DATETIME     | Data e hora da última alteração de tema       |
      +------------------+--------------+-----------------------------------------------+
 
 

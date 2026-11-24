@@ -9,12 +9,7 @@ namespace RainhaLauncherProvas;
 
 public class AdminLockDialog : Form
 {
-    private static readonly Color BrandRed = Color.FromArgb(223, 70, 42);      // #DF462A
-    private static readonly Color BrandOrange = Color.FromArgb(241, 128, 36);  // #F18024
-    private static readonly Color BrandYellow = Color.FromArgb(252, 195, 43);  // #FCC32B
-    private static readonly Color WarmBg = Color.FromArgb(255, 249, 245);      // #FFF9F5
-    private static readonly Color TextDark = Color.FromArgb(45, 37, 34);
-    private static readonly Color TextMuted = Color.FromArgb(120, 105, 98);
+    private readonly ThemePalette _theme;
 
     private readonly Panel _loginPanel;
     private readonly TextBox _txtPassword;
@@ -27,13 +22,15 @@ public class AdminLockDialog : Form
 
     public AdminLockDialog()
     {
+        _theme = AppConfigAndStorage.GetActiveTheme();
+
         Text = "🔒 Acesso Restrito - Rainha";
         Size = new Size(480, 300);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         StartPosition = FormStartPosition.CenterParent;
         MaximizeBox = false;
         MinimizeBox = false;
-        BackColor = WarmBg;
+        BackColor = _theme.WindowBg;
 
         Icon? appIcon = AppConfigAndStorage.LoadEmbeddedIcon();
         if (appIcon != null)
@@ -49,8 +46,8 @@ public class AdminLockDialog : Form
         {
             using var brush = new LinearGradientBrush(
                 topBanner.ClientRectangle,
-                BrandRed,
-                BrandYellow,
+                _theme.BrandRed,
+                _theme.BrandYellow,
                 LinearGradientMode.Horizontal);
             e.Graphics.FillRectangle(brush, topBanner.ClientRectangle);
         };
@@ -62,14 +59,14 @@ public class AdminLockDialog : Form
         _loginPanel = new Panel
         {
             Dock = DockStyle.Fill,
-            BackColor = WarmBg
+            BackColor = _theme.WindowBg
         };
 
         var lblLockTitle = new Label
         {
             Text = "🔒 Área Restrita do Avaliador",
             Font = new Font("Segoe UI", 14F, FontStyle.Bold),
-            ForeColor = BrandRed,
+            ForeColor = _theme.BrandRed,
             Location = new Point(28, 22),
             Size = new Size(410, 30)
         };
@@ -79,7 +76,7 @@ public class AdminLockDialog : Form
         {
             Text = "Digite a senha de administrador para acessar as pastas de\nAvaliações Feitas, Pasta de Templates e configurações de senha:",
             Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
-            ForeColor = TextDark,
+            ForeColor = _theme.TextPrimary,
             Location = new Point(28, 56),
             Size = new Size(410, 42)
         };
@@ -92,6 +89,8 @@ public class AdminLockDialog : Form
             Size = new Size(408, 34),
             UseSystemPasswordChar = true,
             MaxLength = 40,
+            BackColor = _theme.InputBg,
+            ForeColor = _theme.TextPrimary,
             PlaceholderText = "Digite a senha..."
         };
         _loginPanel.Controls.Add(_txtPassword);
@@ -100,7 +99,7 @@ public class AdminLockDialog : Form
         {
             Text = "",
             Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(200, 30, 30),
+            ForeColor = _theme.ErrorText,
             Location = new Point(28, 148),
             Size = new Size(408, 22)
         };
@@ -113,11 +112,11 @@ public class AdminLockDialog : Form
             Location = new Point(204, 184),
             Size = new Size(108, 40),
             FlatStyle = FlatStyle.Flat,
-            BackColor = Color.White,
-            ForeColor = TextDark,
+            BackColor = _theme.SecondaryBtnBg,
+            ForeColor = _theme.TextPrimary,
             Cursor = Cursors.Hand
         };
-        btnCancel.FlatAppearance.BorderColor = Color.FromArgb(215, 195, 185);
+        btnCancel.FlatAppearance.BorderColor = _theme.SecondaryBtnBorder;
         btnCancel.Click += (s, e) => Close();
         _loginPanel.Controls.Add(btnCancel);
 
@@ -128,7 +127,7 @@ public class AdminLockDialog : Form
             Location = new Point(320, 184),
             Size = new Size(116, 40),
             FlatStyle = FlatStyle.Flat,
-            BackColor = BrandRed,
+            BackColor = _theme.BrandRed,
             ForeColor = Color.White,
             Cursor = Cursors.Hand
         };
@@ -142,7 +141,7 @@ public class AdminLockDialog : Form
         _adminPanel = new Panel
         {
             Dock = DockStyle.Fill,
-            BackColor = WarmBg,
+            BackColor = _theme.WindowBg,
             Visible = false
         };
 
@@ -150,7 +149,7 @@ public class AdminLockDialog : Form
         {
             Text = "🔓 Painel de Pastas e Senha - Rainha",
             Font = new Font("Segoe UI", 13.5F, FontStyle.Bold),
-            ForeColor = BrandRed,
+            ForeColor = _theme.BrandRed,
             Location = new Point(26, 18),
             Size = new Size(415, 28)
         };
@@ -160,7 +159,7 @@ public class AdminLockDialog : Form
         {
             Text = "Acesso às Pastas do Sistema:",
             Font = new Font("Segoe UI", 9.75F, FontStyle.Bold),
-            ForeColor = TextDark,
+            ForeColor = _theme.TextPrimary,
             Location = new Point(26, 54),
             Size = new Size(415, 22)
         };
@@ -173,7 +172,7 @@ public class AdminLockDialog : Form
             Location = new Point(26, 80),
             Size = new Size(412, 44),
             FlatStyle = FlatStyle.Flat,
-            BackColor = BrandRed,
+            BackColor = _theme.BrandRed,
             ForeColor = Color.White,
             Cursor = Cursors.Hand
         };
@@ -188,11 +187,11 @@ public class AdminLockDialog : Form
             Location = new Point(26, 132),
             Size = new Size(412, 44),
             FlatStyle = FlatStyle.Flat,
-            BackColor = Color.White,
-            ForeColor = TextDark,
+            BackColor = _theme.SecondaryBtnBg,
+            ForeColor = _theme.TextPrimary,
             Cursor = Cursors.Hand
         };
-        btnOpenTemplates.FlatAppearance.BorderColor = BrandOrange;
+        btnOpenTemplates.FlatAppearance.BorderColor = _theme.BrandOrange;
         btnOpenTemplates.Click += (s, e) => OpenFolder(AppConfigAndStorage.TemplatesDirectory);
         _adminPanel.Controls.Add(btnOpenTemplates);
 
@@ -201,7 +200,7 @@ public class AdminLockDialog : Form
         {
             Location = new Point(26, 192),
             Size = new Size(412, 1),
-            BackColor = Color.FromArgb(230, 205, 195)
+            BackColor = _theme.CardBorder
         };
         _adminPanel.Controls.Add(divider);
 
@@ -209,7 +208,7 @@ public class AdminLockDialog : Form
         {
             Text = "🔑 Gerenciar / Resetar Senha do Cadeado:",
             Font = new Font("Segoe UI", 9.75F, FontStyle.Bold),
-            ForeColor = TextDark,
+            ForeColor = _theme.TextPrimary,
             Location = new Point(26, 204),
             Size = new Size(412, 22)
         };
@@ -221,6 +220,8 @@ public class AdminLockDialog : Form
             Location = new Point(26, 232),
             Size = new Size(248, 30),
             MaxLength = 40,
+            BackColor = _theme.InputBg,
+            ForeColor = _theme.TextPrimary,
             PlaceholderText = "Digite uma nova senha..."
         };
         _adminPanel.Controls.Add(_txtNewPassword);
@@ -232,7 +233,7 @@ public class AdminLockDialog : Form
             Location = new Point(282, 231),
             Size = new Size(156, 32),
             FlatStyle = FlatStyle.Flat,
-            BackColor = BrandOrange,
+            BackColor = _theme.BrandOrange,
             ForeColor = Color.White,
             Cursor = Cursors.Hand
         };
@@ -247,11 +248,11 @@ public class AdminLockDialog : Form
             Location = new Point(26, 272),
             Size = new Size(275, 34),
             FlatStyle = FlatStyle.Flat,
-            BackColor = Color.White,
-            ForeColor = BrandRed,
+            BackColor = _theme.SecondaryBtnBg,
+            ForeColor = _theme.BrandRed,
             Cursor = Cursors.Hand
         };
-        btnResetDefault.FlatAppearance.BorderColor = Color.FromArgb(225, 195, 185);
+        btnResetDefault.FlatAppearance.BorderColor = _theme.SecondaryBtnBorder;
         btnResetDefault.Click += BtnResetDefault_Click;
         _adminPanel.Controls.Add(btnResetDefault);
 
@@ -262,11 +263,11 @@ public class AdminLockDialog : Form
             Location = new Point(312, 272),
             Size = new Size(126, 34),
             FlatStyle = FlatStyle.Flat,
-            BackColor = Color.White,
-            ForeColor = TextDark,
+            BackColor = _theme.SecondaryBtnBg,
+            ForeColor = _theme.TextPrimary,
             Cursor = Cursors.Hand
         };
-        btnCloseAdmin.FlatAppearance.BorderColor = Color.FromArgb(215, 195, 185);
+        btnCloseAdmin.FlatAppearance.BorderColor = _theme.SecondaryBtnBorder;
         btnCloseAdmin.Click += (s, e) => Close();
         _adminPanel.Controls.Add(btnCloseAdmin);
 
@@ -274,7 +275,7 @@ public class AdminLockDialog : Form
         {
             Text = "",
             Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-            ForeColor = Color.FromArgb(25, 135, 60),
+            ForeColor = _theme.SuccessText,
             Location = new Point(26, 314),
             Size = new Size(412, 22)
         };
@@ -312,7 +313,7 @@ public class AdminLockDialog : Form
         string newPwd = _txtNewPassword.Text.Trim();
         if (string.IsNullOrWhiteSpace(newPwd) || newPwd.Length < 4)
         {
-            _lblPasswordStatus.ForeColor = Color.FromArgb(200, 30, 30);
+            _lblPasswordStatus.ForeColor = _theme.ErrorText;
             _lblPasswordStatus.Text = "⚠ A nova senha deve ter pelo menos 4 caracteres.";
             _txtNewPassword.Focus();
             return;
@@ -320,7 +321,7 @@ public class AdminLockDialog : Form
 
         AppConfigAndStorage.SetAdminPassword(newPwd);
         _txtNewPassword.Clear();
-        _lblPasswordStatus.ForeColor = Color.FromArgb(25, 135, 60);
+        _lblPasswordStatus.ForeColor = _theme.SuccessText;
         _lblPasswordStatus.Text = "✔ Nova senha salva com sucesso!";
     }
 
@@ -337,7 +338,7 @@ public class AdminLockDialog : Form
         {
             AppConfigAndStorage.ResetAdminPasswordToDefault();
             _txtNewPassword.Clear();
-            _lblPasswordStatus.ForeColor = Color.FromArgb(25, 135, 60);
+            _lblPasswordStatus.ForeColor = _theme.SuccessText;
             _lblPasswordStatus.Text = "✔ Senha resetada para o padrão: 7272";
         }
     }

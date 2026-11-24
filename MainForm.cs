@@ -10,35 +10,43 @@ namespace RainhaLauncherProvas;
 
 public class MainForm : Form
 {
-    // Paleta oficial extraída do logo Rainha (Desde 2007)
-    private static readonly Color BrandRed = Color.FromArgb(223, 70, 42);        // #DF462A
-    private static readonly Color BrandOrange = Color.FromArgb(241, 128, 36);    // #F18024
-    private static readonly Color BrandYellow = Color.FromArgb(252, 195, 43);    // #FCC32B
-    private static readonly Color WarmBg = Color.FromArgb(255, 249, 245);        // #FFF9F5
-    private static readonly Color CardBg = Color.White;
-    private static readonly Color CardBorder = Color.FromArgb(240, 215, 205);
-    private static readonly Color CardHoverBg = Color.FromArgb(255, 242, 234);
-    private static readonly Color TextDark = Color.FromArgb(45, 37, 34);
-    private static readonly Color TextMuted = Color.FromArgb(120, 105, 98);
+    private ThemePalette _theme;
+
+    private readonly Panel _headerPanel;
+    private readonly Label _lblHeaderTitle;
+    private readonly Label _lblHeaderSubtitle;
+    private readonly Panel _footerPanel;
+    private readonly Button _btnAdminLock;
+    private readonly Button _btnThemeToggle;
+    private readonly Button _btnRefresh;
+    private readonly Button _btnShortcut;
 
     private readonly Panel _selectionContainer;
+    private readonly Label _lblSectionTitle;
     private readonly FlowLayoutPanel _examsListPanel;
+
     private readonly Panel _activeSessionPanel;
+    private readonly Panel _activeCard;
+    private readonly Label _lblInProgressBadge;
     private readonly Label _lblActiveCandidate;
     private readonly Label _lblActiveExam;
     private readonly Label _lblActiveFile;
     private readonly Label _lblTimer;
+    private readonly Label _lblSaveNote;
+    private readonly Button _btnFinishAndSave;
+
     private readonly System.Windows.Forms.Timer _uiTimer;
 
     private ExcelSessionManager? _currentSession;
 
     public MainForm()
     {
+        _theme = AppConfigAndStorage.GetActiveTheme();
+
         Text = "Rainha - Central de Avaliações de Excel";
         Size = new Size(760, 620);
         MinimumSize = new Size(720, 580);
         StartPosition = FormStartPosition.CenterScreen;
-        BackColor = WarmBg;
         DoubleBuffered = true;
 
         Icon? appIcon = AppConfigAndStorage.LoadEmbeddedIcon();
@@ -46,11 +54,10 @@ public class MainForm : Form
             Icon = appIcon;
 
         // 1. Cabeçalho Superior com Logo Rainha
-        var headerPanel = new Panel
+        _headerPanel = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 135,
-            BackColor = Color.White
+            Height = 135
         };
 
         var picLogo = new PictureBox
@@ -63,29 +70,27 @@ public class MainForm : Form
         Image? logoImg = AppConfigAndStorage.LoadEmbeddedLogo();
         if (logoImg != null)
             picLogo.Image = logoImg;
-        headerPanel.Controls.Add(picLogo);
+        _headerPanel.Controls.Add(picLogo);
 
-        var lblHeaderTitle = new Label
+        _lblHeaderTitle = new Label
         {
             Text = "Sistema de Avaliação Prática de Excel",
             Font = new Font("Segoe UI", 16F, FontStyle.Bold),
-            ForeColor = BrandRed,
             AutoSize = false,
             Location = new Point(265, 28),
             Size = new Size(475, 34)
         };
-        headerPanel.Controls.Add(lblHeaderTitle);
+        _headerPanel.Controls.Add(_lblHeaderTitle);
 
-        var lblHeaderSubtitle = new Label
+        _lblHeaderSubtitle = new Label
         {
             Text = "Selecione abaixo a avaliação que você irá realizar.\nAo finalizar ou fechar o Excel, sua avaliação será salva automaticamente.",
             Font = new Font("Segoe UI", 9.75F, FontStyle.Regular),
-            ForeColor = TextMuted,
             AutoSize = false,
             Location = new Point(265, 64),
             Size = new Size(475, 44)
         };
-        headerPanel.Controls.Add(lblHeaderSubtitle);
+        _headerPanel.Controls.Add(_lblHeaderSubtitle);
 
         // Faixa tricolor (Vermelho -> Laranja -> Amarelo Rainha) na base do cabeçalho
         var stripePanel = new Panel
@@ -99,60 +104,67 @@ public class MainForm : Form
                 return;
             using var brush = new LinearGradientBrush(
                 stripePanel.ClientRectangle,
-                BrandRed,
-                BrandYellow,
+                _theme.BrandRed,
+                _theme.BrandYellow,
                 LinearGradientMode.Horizontal);
             var blend = new ColorBlend
             {
-                Colors = new[] { BrandRed, BrandOrange, BrandYellow },
+                Colors = new[] { _theme.BrandRed, _theme.BrandOrange, _theme.BrandYellow },
                 Positions = new[] { 0f, 0.5f, 1f }
             };
             brush.InterpolationColors = blend;
             e.Graphics.FillRectangle(brush, stripePanel.ClientRectangle);
         };
-        headerPanel.Controls.Add(stripePanel);
+        _headerPanel.Controls.Add(stripePanel);
 
-        // 2. Rodapé com ícone de Cadeado (Acesso Restrito por Senha) e ações básicas
-        var footerPanel = new Panel
+        // 2. Rodapé com ícone de Cadeado (Acesso Restrito por Senha), Modo Noturno e ações básicas
+        _footerPanel = new Panel
         {
             Dock = DockStyle.Bottom,
             Height = 56,
-            BackColor = Color.FromArgb(248, 238, 232),
             Padding = new Padding(20, 10, 20, 10)
         };
 
-        var btnAdminLock = new Button
+        _btnAdminLock = new Button
         {
             Text = "🔒",
             Font = new Font("Segoe UI Emoji", 13F, FontStyle.Regular),
             Location = new Point(24, 10),
             Size = new Size(46, 36),
             FlatStyle = FlatStyle.Flat,
-            BackColor = BrandRed,
             ForeColor = Color.White,
             Cursor = Cursors.Hand
         };
-        btnAdminLock.FlatAppearance.BorderSize = 0;
+        _btnAdminLock.FlatAppearance.BorderSize = 0;
         var toolTip = new ToolTip();
-        toolTip.SetToolTip(btnAdminLock, "Acesso Restrito (Avaliações Feitas, Pasta de Templates e Senha)");
-        btnAdminLock.Click += (s, e) =>
+        toolTip.SetToolTip(_btnAdminLock, "Acesso Restrito (Avaliações Feitas, Pasta de Templates e Senha)");
+        _btnAdminLock.Click += (s, e) =>
         {
             using var lockDlg = new AdminLockDialog();
             lockDlg.ShowDialog(this);
             LoadExamTemplates();
         };
-        footerPanel.Controls.Add(btnAdminLock);
+        _footerPanel.Controls.Add(_btnAdminLock);
 
-        var btnRefresh = CreateFooterButton("🔄 Atualizar Lista", Color.White, TextDark);
-        btnRefresh.Location = new Point(445, 11);
-        btnRefresh.Size = new Size(140, 34);
-        btnRefresh.Click += (s, e) => LoadExamTemplates();
-        footerPanel.Controls.Add(btnRefresh);
+        _btnThemeToggle = CreateFooterButton("🌙 Modo Noturno", _theme.SecondaryBtnBg, _theme.TextPrimary);
+        _btnThemeToggle.Location = new Point(285, 11);
+        _btnThemeToggle.Size = new Size(150, 34);
+        _btnThemeToggle.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        _btnThemeToggle.Click += (s, e) => ToggleTheme();
+        _footerPanel.Controls.Add(_btnThemeToggle);
 
-        var btnShortcut = CreateFooterButton("📌 Atalho Desktop", Color.White, BrandOrange);
-        btnShortcut.Location = new Point(595, 11);
-        btnShortcut.Size = new Size(130, 34);
-        btnShortcut.Click += (s, e) =>
+        _btnRefresh = CreateFooterButton("🔄 Atualizar Lista", _theme.SecondaryBtnBg, _theme.TextPrimary);
+        _btnRefresh.Location = new Point(445, 11);
+        _btnRefresh.Size = new Size(140, 34);
+        _btnRefresh.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        _btnRefresh.Click += (s, e) => LoadExamTemplates();
+        _footerPanel.Controls.Add(_btnRefresh);
+
+        _btnShortcut = CreateFooterButton("📌 Atalho Desktop", _theme.SecondaryBtnBg, _theme.BrandOrange);
+        _btnShortcut.Location = new Point(595, 11);
+        _btnShortcut.Size = new Size(130, 34);
+        _btnShortcut.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        _btnShortcut.Click += (s, e) =>
         {
             string exePath = Environment.ProcessPath ?? Path.Combine(AppConfigAndStorage.BaseDirectory, AppConfigAndStorage.InstalledExeName);
             AppConfigAndStorage.CreateDesktopShortcut(exePath, AppConfigAndStorage.BaseDirectory);
@@ -162,21 +174,19 @@ public class MainForm : Form
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
         };
-        footerPanel.Controls.Add(btnShortcut);
+        _footerPanel.Controls.Add(_btnShortcut);
 
         // 3. Container Principal de Seleção de Avaliações
         _selectionContainer = new Panel
         {
             Dock = DockStyle.Fill,
-            Padding = new Padding(26, 18, 26, 14),
-            BackColor = WarmBg
+            Padding = new Padding(26, 18, 26, 14)
         };
 
-        var lblSectionTitle = new Label
+        _lblSectionTitle = new Label
         {
             Text = "📋 Escolha a Avaliação para Iniciar:",
             Font = new Font("Segoe UI", 12.5F, FontStyle.Bold),
-            ForeColor = TextDark,
             Dock = DockStyle.Top,
             Height = 34
         };
@@ -187,39 +197,35 @@ public class MainForm : Form
             AutoScroll = true,
             FlowDirection = FlowDirection.TopDown,
             WrapContents = false,
-            BackColor = WarmBg,
             Padding = new Padding(0, 6, 0, 6)
         };
         _examsListPanel.SizeChanged += (s, e) => ResizeExamCards();
 
         _selectionContainer.Controls.Add(_examsListPanel);
-        _selectionContainer.Controls.Add(lblSectionTitle);
+        _selectionContainer.Controls.Add(_lblSectionTitle);
 
         // 4. Painel de "Avaliação em Andamento" (exibido enquanto o Excel está aberto)
         _activeSessionPanel = new Panel
         {
             Dock = DockStyle.Fill,
-            BackColor = WarmBg,
             Visible = false,
             Padding = new Padding(40, 28, 40, 28)
         };
 
-        var activeCard = new Panel
+        _activeCard = new Panel
         {
-            Dock = DockStyle.Fill,
-            BackColor = Color.White
+            Dock = DockStyle.Fill
         };
-        activeCard.Paint += (s, e) =>
+        _activeCard.Paint += (s, e) =>
         {
-            using var pen = new Pen(BrandOrange, 2);
-            e.Graphics.DrawRectangle(pen, 1, 1, activeCard.Width - 3, activeCard.Height - 3);
+            using var pen = new Pen(_theme.BrandOrange, 2);
+            e.Graphics.DrawRectangle(pen, 1, 1, _activeCard.Width - 3, _activeCard.Height - 3);
         };
 
-        var lblInProgressBadge = new Label
+        _lblInProgressBadge = new Label
         {
             Text = "⏳ AVALIAÇÃO EM ANDAMENTO NO EXCEL",
             Font = new Font("Segoe UI", 14F, FontStyle.Bold),
-            ForeColor = BrandRed,
             TextAlign = ContentAlignment.MiddleCenter,
             Dock = DockStyle.Top,
             Height = 52
@@ -229,7 +235,6 @@ public class MainForm : Form
         {
             Text = "Candidato: -",
             Font = new Font("Segoe UI", 12.5F, FontStyle.Bold),
-            ForeColor = TextDark,
             TextAlign = ContentAlignment.MiddleCenter,
             Dock = DockStyle.Top,
             Height = 34
@@ -239,7 +244,6 @@ public class MainForm : Form
         {
             Text = "Avaliação: -",
             Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold),
-            ForeColor = BrandOrange,
             TextAlign = ContentAlignment.MiddleCenter,
             Dock = DockStyle.Top,
             Height = 30
@@ -249,7 +253,6 @@ public class MainForm : Form
         {
             Text = "Arquivo salvo automaticamente em: -",
             Font = new Font("Segoe UI", 9.5F, FontStyle.Regular),
-            ForeColor = TextMuted,
             TextAlign = ContentAlignment.MiddleCenter,
             Dock = DockStyle.Top,
             Height = 28
@@ -259,17 +262,15 @@ public class MainForm : Form
         {
             Text = "Tempo decorrido: 00:00:00",
             Font = new Font("Segoe UI", 16F, FontStyle.Bold),
-            ForeColor = TextDark,
             TextAlign = ContentAlignment.MiddleCenter,
             Dock = DockStyle.Top,
             Height = 54
         };
 
-        var lblSaveNote = new Label
+        _lblSaveNote = new Label
         {
             Text = "💡 Você pode fechar o Excel normalmente no 'X' ao terminar ou clicar no botão abaixo.\nSua avaliação será salva automaticamente com seu nome completo.",
             Font = new Font("Segoe UI", 9.75F, FontStyle.Regular),
-            ForeColor = TextMuted,
             TextAlign = ContentAlignment.MiddleCenter,
             Dock = DockStyle.Top,
             Height = 48
@@ -278,49 +279,100 @@ public class MainForm : Form
         var btnFinishWrapper = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 68
+            Height = 68,
+            BackColor = Color.Transparent
         };
 
-        var btnFinishAndSave = new Button
+        _btnFinishAndSave = new Button
         {
             Text = "✅ Finalizar e Salvar Avaliação Agora",
             Font = new Font("Segoe UI", 12F, FontStyle.Bold),
             Size = new Size(360, 48),
             FlatStyle = FlatStyle.Flat,
-            BackColor = BrandRed,
             ForeColor = Color.White,
             Cursor = Cursors.Hand
         };
-        btnFinishAndSave.FlatAppearance.BorderSize = 0;
+        _btnFinishAndSave.FlatAppearance.BorderSize = 0;
         btnFinishWrapper.SizeChanged += (s, e) =>
         {
-            btnFinishAndSave.Location = new Point((btnFinishWrapper.Width - btnFinishAndSave.Width) / 2, 10);
+            _btnFinishAndSave.Location = new Point((btnFinishWrapper.Width - _btnFinishAndSave.Width) / 2, 10);
         };
-        btnFinishAndSave.Click += (s, e) =>
+        _btnFinishAndSave.Click += (s, e) =>
         {
             _currentSession?.SaveAndCloseSession();
         };
-        btnFinishWrapper.Controls.Add(btnFinishAndSave);
+        btnFinishWrapper.Controls.Add(_btnFinishAndSave);
 
-        activeCard.Controls.Add(btnFinishWrapper);
-        activeCard.Controls.Add(lblSaveNote);
-        activeCard.Controls.Add(_lblTimer);
-        activeCard.Controls.Add(_lblActiveFile);
-        activeCard.Controls.Add(_lblActiveExam);
-        activeCard.Controls.Add(_lblActiveCandidate);
-        activeCard.Controls.Add(lblInProgressBadge);
-        _activeSessionPanel.Controls.Add(activeCard);
+        _activeCard.Controls.Add(btnFinishWrapper);
+        _activeCard.Controls.Add(_lblSaveNote);
+        _activeCard.Controls.Add(_lblTimer);
+        _activeCard.Controls.Add(_lblActiveFile);
+        _activeCard.Controls.Add(_lblActiveExam);
+        _activeCard.Controls.Add(_lblActiveCandidate);
+        _activeCard.Controls.Add(_lblInProgressBadge);
+        _activeSessionPanel.Controls.Add(_activeCard);
 
         Controls.Add(_activeSessionPanel);
         Controls.Add(_selectionContainer);
-        Controls.Add(footerPanel);
-        Controls.Add(headerPanel);
+        Controls.Add(_footerPanel);
+        Controls.Add(_headerPanel);
 
         _uiTimer = new System.Windows.Forms.Timer { Interval = 1000 };
         _uiTimer.Tick += UiTimer_Tick;
 
+        ApplyTheme();
+
         Load += (s, e) => LoadExamTemplates();
         FormClosing += MainForm_FormClosing;
+    }
+
+    private void ToggleTheme()
+    {
+        bool nextDark = !_theme.IsDark;
+        AppConfigAndStorage.SetDarkModeEnabled(nextDark);
+        _theme = nextDark ? ThemePalette.Dark : ThemePalette.Light;
+        ApplyTheme();
+        LoadExamTemplates();
+    }
+
+    private void ApplyTheme()
+    {
+        BackColor = _theme.WindowBg;
+        _headerPanel.BackColor = _theme.HeaderBg;
+        _lblHeaderTitle.ForeColor = _theme.BrandRed;
+        _lblHeaderSubtitle.ForeColor = _theme.TextMuted;
+
+        _footerPanel.BackColor = _theme.FooterBg;
+        _btnAdminLock.BackColor = _theme.BrandRed;
+
+        _btnThemeToggle.Text = _theme.IsDark ? "☀️ Modo Claro" : "🌙 Modo Noturno";
+        _btnThemeToggle.BackColor = _theme.SecondaryBtnBg;
+        _btnThemeToggle.ForeColor = _theme.TextPrimary;
+        _btnThemeToggle.FlatAppearance.BorderColor = _theme.SecondaryBtnBorder;
+
+        _btnRefresh.BackColor = _theme.SecondaryBtnBg;
+        _btnRefresh.ForeColor = _theme.TextPrimary;
+        _btnRefresh.FlatAppearance.BorderColor = _theme.SecondaryBtnBorder;
+
+        _btnShortcut.BackColor = _theme.SecondaryBtnBg;
+        _btnShortcut.ForeColor = _theme.BrandOrange;
+        _btnShortcut.FlatAppearance.BorderColor = _theme.SecondaryBtnBorder;
+
+        _selectionContainer.BackColor = _theme.WindowBg;
+        _lblSectionTitle.ForeColor = _theme.TextPrimary;
+        _examsListPanel.BackColor = _theme.WindowBg;
+
+        _activeSessionPanel.BackColor = _theme.WindowBg;
+        _activeCard.BackColor = _theme.CardBg;
+        _lblInProgressBadge.ForeColor = _theme.BrandRed;
+        _lblActiveCandidate.ForeColor = _theme.TextPrimary;
+        _lblActiveExam.ForeColor = _theme.BrandOrange;
+        _lblActiveFile.ForeColor = _theme.TextMuted;
+        _lblTimer.ForeColor = _theme.TextPrimary;
+        _lblSaveNote.ForeColor = _theme.TextMuted;
+        _btnFinishAndSave.BackColor = _theme.BrandRed;
+
+        Invalidate(true);
     }
 
     private Button CreateFooterButton(string text, Color bg, Color fg)
@@ -334,7 +386,7 @@ public class MainForm : Form
             ForeColor = fg,
             Cursor = Cursors.Hand
         };
-        btn.FlatAppearance.BorderColor = Color.FromArgb(220, 195, 185);
+        btn.FlatAppearance.BorderColor = _theme.SecondaryBtnBorder;
         return btn;
     }
 
@@ -351,7 +403,7 @@ public class MainForm : Form
             {
                 Text = "Nenhuma avaliação (.xlsx) encontrada na pasta Templates.\nAcesse o cadeado '🔒' abaixo para adicionar arquivos de avaliação na Pasta de Templates.",
                 Font = new Font("Segoe UI", 11F, FontStyle.Regular),
-                ForeColor = TextMuted,
+                ForeColor = _theme.TextMuted,
                 AutoSize = false,
                 Size = new Size(650, 90),
                 TextAlign = ContentAlignment.MiddleCenter
@@ -378,20 +430,20 @@ public class MainForm : Form
         {
             Size = new Size(cardWidth, 78),
             Margin = new Padding(4, 6, 4, 6),
-            BackColor = CardBg,
+            BackColor = _theme.CardBg,
             Cursor = Cursors.Hand
         };
 
         card.Paint += (s, e) =>
         {
-            using var borderPen = new Pen(CardBorder, 1);
+            using var borderPen = new Pen(_theme.CardBorder, 1);
             e.Graphics.DrawRectangle(borderPen, 0, 0, card.Width - 1, card.Height - 1);
 
             // Barra lateral esquerda nas cores da Rainha
             using var accentBrush = new LinearGradientBrush(
                 new Rectangle(0, 0, 7, card.Height),
-                BrandRed,
-                BrandOrange,
+                _theme.BrandRed,
+                _theme.BrandOrange,
                 LinearGradientMode.Vertical);
             e.Graphics.FillRectangle(accentBrush, 0, 0, 7, card.Height);
         };
@@ -400,6 +452,7 @@ public class MainForm : Form
         {
             Text = "📊",
             Font = new Font("Segoe UI Emoji", 20F, FontStyle.Regular),
+            ForeColor = _theme.TextPrimary,
             Location = new Point(20, 18),
             Size = new Size(46, 44),
             BackColor = Color.Transparent,
@@ -410,7 +463,7 @@ public class MainForm : Form
         {
             Text = item.DisplayName,
             Font = new Font("Segoe UI", 13F, FontStyle.Bold),
-            ForeColor = TextDark,
+            ForeColor = _theme.TextPrimary,
             Location = new Point(70, 14),
             Size = new Size(410, 28),
             BackColor = Color.Transparent,
@@ -421,7 +474,7 @@ public class MainForm : Form
         {
             Text = $"Modelo Original Protegido (.xlsx) • Clique para informar seu nome e iniciar",
             Font = new Font("Segoe UI", 9F, FontStyle.Regular),
-            ForeColor = TextMuted,
+            ForeColor = _theme.TextMuted,
             Location = new Point(70, 44),
             Size = new Size(430, 20),
             BackColor = Color.Transparent,
@@ -436,7 +489,7 @@ public class MainForm : Form
             Location = new Point(card.Width - 184, 19),
             Anchor = AnchorStyles.Top | AnchorStyles.Right,
             FlatStyle = FlatStyle.Flat,
-            BackColor = BrandRed,
+            BackColor = _theme.BrandRed,
             ForeColor = Color.White,
             Cursor = Cursors.Hand
         };
@@ -450,8 +503,8 @@ public class MainForm : Form
         lblMeta.Click += TriggerSelection;
         btnSelect.Click += TriggerSelection;
 
-        void OnMouseEnterCard(object? s, EventArgs e) => card.BackColor = CardHoverBg;
-        void OnMouseLeaveCard(object? s, EventArgs e) => card.BackColor = CardBg;
+        void OnMouseEnterCard(object? s, EventArgs e) => card.BackColor = _theme.CardHoverBg;
+        void OnMouseLeaveCard(object? s, EventArgs e) => card.BackColor = _theme.CardBg;
 
         card.MouseEnter += OnMouseEnterCard;
         card.MouseLeave += OnMouseLeaveCard;
@@ -588,23 +641,6 @@ public class MainForm : Form
             "Avaliação Salva com Sucesso - Rainha",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
-    }
-
-    private static void OpenFolderInExplorer(string folderPath)
-    {
-        try
-        {
-            Directory.CreateDirectory(folderPath);
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = folderPath,
-                UseShellExecute = true
-            });
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"Não foi possível abrir a pasta:\n{ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
     }
 
     private void MainForm_FormClosing(object? sender, FormClosingEventArgs e)
