@@ -188,5 +188,7 @@ respostas ao fechar o Excel.
 - AdminLockDialog.cs          : Modal de autenticação por senha (cadeado 🔒) e
                                 painel restrito de pastas e reset de senha.
 - CandidateNameDialog.cs      : Modal de captura e validação do Nome Completo.
+- ThemedMessageDialog.cs      : Diálogo pop-up temático (Modo Claro / Noturno)
+                                substituindo o MessageBox padrão do Windows.
 - InstallerForm.cs            : Interface do Instalador Único de 1 clique.
 ================================================================================

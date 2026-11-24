@@ -162,10 +162,10 @@ public class MainForm : Form
         {
             string exePath = Environment.ProcessPath ?? Path.Combine(AppConfigAndStorage.BaseDirectory, AppConfigAndStorage.InstalledExeName);
             AppConfigAndStorage.CreateDesktopShortcut(exePath, AppConfigAndStorage.BaseDirectory);
-            MessageBox.Show(
+            ThemedMessageDialog.Show(
+                this,
                 "Atalho 'Avaliações - Rainha' criado/atualizado com sucesso na Área de Trabalho!",
                 "Atalho Criado",
-                MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
         };
         _footerPanel.Controls.Add(_btnShortcut);
@@ -554,10 +554,10 @@ public class MainForm : Form
     {
         if (_currentSession != null)
         {
-            MessageBox.Show(
+            ThemedMessageDialog.Show(
+                this,
                 "Já existe uma avaliação em andamento no Excel. Finalize a avaliação atual antes de iniciar outra.",
                 "Avaliação em Andamento",
-                MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
             return;
         }
@@ -608,10 +608,10 @@ public class MainForm : Form
             _currentSession?.Dispose();
             _currentSession = null;
 
-            MessageBox.Show(
+            ThemedMessageDialog.Show(
+                this,
                 $"Não foi possível abrir a avaliação no Microsoft Excel:\n\n{ex.Message}",
                 "Erro ao Iniciar Avaliação",
-                MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
     }
@@ -648,7 +648,7 @@ public class MainForm : Form
             WindowState = FormWindowState.Normal;
         Activate();
 
-        MessageBox.Show(
+        ThemedMessageDialog.Show(
             this,
             $"Avaliação finalizada e salva com sucesso!\n\n" +
             $"👤 Candidato(a): {finishedSession.CandidateName}\n" +
@@ -656,7 +656,6 @@ public class MainForm : Form
             $"💾 Arquivo salvo: {Path.GetFileName(finishedSession.TargetFilePath)}\n" +
             $"📁 Pasta: {AppConfigAndStorage.CompletedExamsDirectory}",
             "Avaliação Salva com Sucesso - Rainha",
-            MessageBoxButtons.OK,
             MessageBoxIcon.Information);
     }
 
@@ -664,7 +663,8 @@ public class MainForm : Form
     {
         if (_currentSession != null)
         {
-            var resp = MessageBox.Show(
+            var resp = ThemedMessageDialog.Show(
+                this,
                 "Existe uma avaliação aberta no Excel no momento.\nDeseja salvar automaticamente e fechar a avaliação antes de sair?",
                 "Avaliação em Andamento",
                 MessageBoxButtons.YesNoCancel,

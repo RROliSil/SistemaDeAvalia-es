@@ -144,7 +144,7 @@ public class InstallerForm : Form
 
             string finalDir = AppConfigAndStorage.InstallSystemAndCreateShortcut(targetDir);
 
-            MessageBox.Show(
+            ThemedMessageDialog.Show(
                 this,
                 $"Instalação concluída com sucesso!\n\n" +
                 $"📁 Pasta do Sistema: {finalDir}\n" +
@@ -152,7 +152,6 @@ public class InstallerForm : Form
                 $"💾 Pasta de Avaliações Feitas: {Path.Combine(finalDir, "Provas Feitas")}\n" +
                 $"🖥️ Atalho criado na Área de Trabalho: 'Avaliações - Rainha'",
                 "Instalação Concluída - Rainha",
-                MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
 
             if (_chkOpenAfterInstall.Checked)
@@ -174,11 +173,10 @@ public class InstallerForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(
+            ThemedMessageDialog.Show(
                 this,
                 $"Erro durante a instalação:\n{ex.Message}",
                 "Erro",
-                MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
     }

@@ -328,7 +328,7 @@ public class AdminLockDialog : Form
 
     private void BtnResetDefault_Click(object? sender, EventArgs e)
     {
-        var confirm = MessageBox.Show(
+        var confirm = ThemedMessageDialog.Show(
             this,
             "Deseja realmente resetar a senha do cadeado de volta para a senha inicial padrão (7272)?",
             "Confirmar Reset de Senha",
@@ -357,7 +357,7 @@ public class AdminLockDialog : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, $"Não foi possível abrir a pasta:\n{ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ThemedMessageDialog.Show(this, $"Não foi possível abrir a pasta:\n{ex.Message}", "Erro", MessageBoxIcon.Error);
         }
     }
 }
