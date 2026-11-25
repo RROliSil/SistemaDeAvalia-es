@@ -194,4 +194,6 @@ respostas ao fechar o Excel.
 - ThemedMessageDialog.cs      : Diálogo pop-up temático (Modo Claro / Noturno)
                                 substituindo o MessageBox padrão do Windows.
 - InstallerForm.cs            : Interface do Instalador Único de 1 clique.
+- Obsidian_Rainha_Avaliacoes\ : Vault (cofre) Obsidian com notas interligadas,
+                                diagramas Mermaid e guias operacionais do sistema.
 ================================================================================
